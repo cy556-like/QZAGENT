@@ -6051,6 +6051,16 @@ html { scroll-behavior: smooth; }
 
 }
 
+/* Login Top Bar Logo */
+.login-top-bar-logo {
+    height: 36px;
+    width: auto;
+    margin-right: 12px;
+    vertical-align: middle;
+    user-select: none;
+    pointer-events: none;
+}
+
 
 
 
