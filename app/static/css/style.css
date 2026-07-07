@@ -52,7 +52,7 @@
     --success: #16a34a;
 
 
-    --error: #1051BF;
+    --error: #15589B;
 
 
     --warning: #f59e0b;
@@ -4057,7 +4057,7 @@ html { scroll-behavior: smooth; }
     flex-shrink: 0;
 
 
-    background: #1051BF;
+    background: #15589B;
 
 
     color: #FFFFFF;
@@ -4120,7 +4120,7 @@ html { scroll-behavior: smooth; }
     padding: 10px 14px;
 
 
-    background: #1051BF;
+    background: #15589B;
 
 
     border: none;
@@ -4159,13 +4159,13 @@ html { scroll-behavior: smooth; }
 .new-chat-btn:hover {
 
 
-    background: #0C3E94;
+    background: #0F467A;
 
 
 }
 
 
-[data-theme="dark"] .new-chat-btn:hover { background: #0C3E94; }
+[data-theme="dark"] .new-chat-btn:hover { background: #0F467A; }
 
 
 .new-chat-btn .plus-icon {
@@ -4417,7 +4417,7 @@ html { scroll-behavior: smooth; }
 .chat-action-btn:hover { background: rgba(0,0,0,0.06); color: var(--text-primary); }
 
 
-.chat-action-btn.delete:hover { color: var(--error); background: rgba(16, 81, 191, 0.08); }
+.chat-action-btn.delete:hover { color: var(--error); background: rgba(21, 88, 155, 0.08); }
 
 
 .chat-item .chat-time { font-size: 11px; color: var(--text-secondary); opacity: 0.6; flex-shrink: 0; }
@@ -4573,7 +4573,7 @@ html { scroll-behavior: smooth; }
     border-radius: 6px;
 
 
-    background: #1051BF;
+    background: #15589B;
 
 
     display: flex;
@@ -4654,7 +4654,7 @@ html { scroll-behavior: smooth; }
 }
 
 
-.header-logout-btn:hover { background: rgba(16, 81, 191, 0.08); color: var(--error); }
+.header-logout-btn:hover { background: rgba(21, 88, 155, 0.08); color: var(--error); }
 
 
 
@@ -4756,7 +4756,7 @@ html { scroll-behavior: smooth; }
 .header-btn:hover { border-color: #ccc; color: var(--text-primary); background: var(--bg-secondary); }
 
 
-.header-btn.danger:hover { border-color: var(--error); color: var(--error); background: rgba(16, 81, 191,0.04); }
+.header-btn.danger:hover { border-color: var(--error); color: var(--error); background: rgba(21, 88, 155,0.04); }
 
 
 .model-select { padding: 6px 10px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 12px; cursor: pointer; outline: none; transition: border 0.2s; }
@@ -6010,7 +6010,7 @@ html { scroll-behavior: smooth; }
     height: 56px;
 
 
-    background: #1051BF;
+    background: #15589B;
 
 
     display: flex;
@@ -6258,7 +6258,7 @@ html { scroll-behavior: smooth; }
 .login-lock-icon {
 
 
-    color: #1051BF;
+    color: #15589B;
 
 
     flex-shrink: 0;
@@ -6270,7 +6270,7 @@ html { scroll-behavior: smooth; }
 .login-form-header h3 {
     font-size: 24px;
     font-weight: 700;
-    color: #1051BF;
+    color: #15589B;
     margin: 0;
     letter-spacing: 1px;
 }
@@ -6295,7 +6295,7 @@ html { scroll-behavior: smooth; }
     height: 2px;
 
 
-    background: #1051BF;
+    background: #15589B;
 
 
     margin-top: 10px;
@@ -6373,10 +6373,10 @@ html { scroll-behavior: smooth; }
 .login-modal-body .form-group input:focus {
 
 
-    border-color: rgba(16, 81, 191, 0.6);
+    border-color: rgba(21, 88, 155, 0.6);
 
 
-    box-shadow: 0 0 0 4px rgba(16, 81, 191, 0.1);
+    box-shadow: 0 0 0 4px rgba(21, 88, 155, 0.1);
 
 
     background: #FFFFFF;
@@ -6409,7 +6409,7 @@ html { scroll-behavior: smooth; }
     padding: 12px;
 
 
-    background: #1051BF;
+    background: #15589B;
 
 
     color: #FFFFFF;
@@ -6472,10 +6472,10 @@ html { scroll-behavior: smooth; }
 .btn-login:hover {
 
 
-    background: #0C3E94;
+    background: #0F467A;
 
 
-    box-shadow: 0 8px 24px rgba(16, 81, 191, 0.35);
+    box-shadow: 0 8px 24px rgba(21, 88, 155, 0.35);
 
 
     transform: translateY(-1px);
@@ -6490,7 +6490,7 @@ html { scroll-behavior: smooth; }
     transform: translateY(0) scale(0.99);
 
 
-    box-shadow: 0 2px 8px rgba(16, 81, 191, 0.25);
+    box-shadow: 0 2px 8px rgba(21, 88, 155, 0.25);
 
 
 }
@@ -6532,13 +6532,13 @@ html { scroll-behavior: smooth; }
     display: block;
 
 
-    background: rgba(16, 81, 191, 0.08);
+    background: rgba(21, 88, 155, 0.08);
 
 
-    color: #1051BF;
+    color: #15589B;
 
 
-    border: 1px solid rgba(16, 81, 191, 0.12);
+    border: 1px solid rgba(21, 88, 155, 0.12);
 
 
 }
@@ -6604,7 +6604,7 @@ html { scroll-behavior: smooth; }
 [data-theme="dark"] .login-top-bar {
 
 
-    background: #0C3E94;
+    background: #0F467A;
 
 
 }
@@ -6670,10 +6670,10 @@ html { scroll-behavior: smooth; }
 [data-theme="dark"] .login-modal-body .form-group input:focus {
 
 
-    border-color: rgba(16, 81, 191, 0.5);
+    border-color: rgba(21, 88, 155, 0.5);
 
 
-    box-shadow: 0 0 0 4px rgba(16, 81, 191, 0.1);
+    box-shadow: 0 0 0 4px rgba(21, 88, 155, 0.1);
 
 
     background: rgba(255, 255, 255, 0.18);
@@ -6694,7 +6694,7 @@ html { scroll-behavior: smooth; }
 [data-theme="dark"] .btn-login {
 
 
-    background: #1051BF;
+    background: #15589B;
 
 
     color: #FFFFFF;
@@ -6706,10 +6706,10 @@ html { scroll-behavior: smooth; }
 [data-theme="dark"] .btn-login:hover {
 
 
-    background: #0C3E94;
+    background: #0F467A;
 
 
-    box-shadow: 0 8px 24px rgba(16, 81, 191, 0.3);
+    box-shadow: 0 8px 24px rgba(21, 88, 155, 0.3);
 
 
 }
@@ -6718,10 +6718,10 @@ html { scroll-behavior: smooth; }
 [data-theme="dark"] .msg-box.error {
 
 
-    background: rgba(16, 81, 191, 0.15);
+    background: rgba(21, 88, 155, 0.15);
 
 
-    border-color: rgba(16, 81, 191, 0.2);
+    border-color: rgba(21, 88, 155, 0.2);
 
 
     color: #60A5FA;
@@ -6958,7 +6958,7 @@ html { scroll-behavior: smooth; }
 .modal .doc-item:hover .doc-delete-btn { opacity: 1; }
 
 
-.modal .doc-item .doc-delete-btn:hover { color: var(--error); background: rgba(16, 81, 191,0.06); }
+.modal .doc-item .doc-delete-btn:hover { color: var(--error); background: rgba(21, 88, 155,0.06); }
 
 
 .modal .doc-item .doc-download-btn { padding: 4px 8px; background: transparent; border: none; border-radius: 4px; color: var(--text-secondary); font-size: 14px; cursor: pointer; transition: all 0.15s; white-space: nowrap; opacity: 0; }
@@ -7911,7 +7911,7 @@ html { scroll-behavior: smooth; }
     color: var(--error);
 
 
-    background: rgba(16, 81, 191,0.08);
+    background: rgba(21, 88, 155,0.08);
 
 
 }
@@ -8100,7 +8100,7 @@ html { scroll-behavior: smooth; }
 [data-theme="dark"] .new-chat-btn { border-color: #3a3a3a; }
 
 
-[data-theme="dark"] .new-chat-btn:hover { background: #0C3E94; }
+[data-theme="dark"] .new-chat-btn:hover { background: #0F467A; }
 
 
 [data-theme="dark"] .mode-switcher-box { background: #262626; border-color: #3a3a3a; }
@@ -8133,7 +8133,7 @@ html { scroll-behavior: smooth; }
 [data-theme="dark"] .header-logout-btn { color: #b0b0b0; }
 
 
-[data-theme="dark"] .header-logout-btn:hover { background: rgba(16, 81, 191, 0.15); color: #1051BF; }
+[data-theme="dark"] .header-logout-btn:hover { background: rgba(21, 88, 155, 0.15); color: #15589B; }
 
 
 [data-theme="dark"] .toggle-sidebar-btn { border-color: #3a3a3a; color: #b0b0b0; }
@@ -10650,7 +10650,7 @@ html { scroll-behavior: smooth; }
     background: #e8e8e9;
 
 
-    border-color: #1051BF;
+    border-color: #15589B;
 
 
 }
@@ -10917,7 +10917,7 @@ html { scroll-behavior: smooth; }
     color: var(--error);
 
 
-    background: rgba(16, 81, 191,0.08);
+    background: rgba(21, 88, 155,0.08);
 
 
 }
@@ -10926,7 +10926,7 @@ html { scroll-behavior: smooth; }
 .agent-action-btn.new-chat:hover {
 
 
-    background: rgba(16, 81, 191,0.08);
+    background: rgba(21, 88, 155,0.08);
 
 
 }
@@ -10935,7 +10935,7 @@ html { scroll-behavior: smooth; }
 .agent-action-btn.new-chat:hover .agent-new-chat-icon rect {
 
 
-    fill: #0C3E94;
+    fill: #0F467A;
 
 
 }
@@ -12222,7 +12222,7 @@ html { scroll-behavior: smooth; }
 .kb-progress-status.error {
 
 
-    color: #1051BF;
+    color: #15589B;
 
 
 }
@@ -12438,13 +12438,13 @@ html { scroll-behavior: smooth; }
     background: transparent;
 
 
-    border: 1px solid rgba(16, 81, 191, 0.2);
+    border: 1px solid rgba(21, 88, 155, 0.2);
 
 
     border-radius: 6px;
 
 
-    color: #1051BF;
+    color: #15589B;
 
 
     font-size: 12px;
@@ -12468,10 +12468,10 @@ html { scroll-behavior: smooth; }
 .kb-doc-delete-btn:hover {
 
 
-    background: rgba(16, 81, 191, 0.06);
+    background: rgba(21, 88, 155, 0.06);
 
 
-    border-color: #1051BF;
+    border-color: #15589B;
 
 
 }
