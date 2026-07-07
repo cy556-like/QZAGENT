@@ -2940,6 +2940,87 @@ async def get_agents(authorization: str = Header(None)):
 
 
 
+
+# ===== 体系调研文档上传与AI提取 =====
+
+@router.post("/survey/upload", summary="上传体系调研文档到临时目录")
+async def survey_upload(file: UploadFile = File(...), username: str = Depends(require_auth)):
+    """上传质量手册等文档到临时目录（不入知识库），用于AI提取企业信息"""
+    import uuid
+    allowed_ext = {".pdf", ".txt", ".docx", ".doc"}
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_ext:
+        raise HTTPException(status_code=400, detail=f"不支持的格式: {ext}，仅支持 PDF/TXT/DOCX/DOC")
+    temp_dir = os.path.join(settings.DATA_DIR, "temp", "survey")
+    os.makedirs(temp_dir, exist_ok=True)
+    file_id = uuid.uuid4().hex[:8]
+    safe_name = file.filename.replace('/', '_').replace('\\', '_')
+    file_path = os.path.join(temp_dir, f"{file_id}_{safe_name}")
+    with open(file_path, "wb") as f:
+        content_bytes = await file.read()
+        f.write(content_bytes)
+    logger.info(f"[调研上传] 用户={username}, 文件={file.filename}, 路径={file_path}")
+    return {"success": True, "file_path": file_path, "filename": file.filename}
+
+
+@router.post("/survey/extract", summary="AI提取文档中的企业信息")
+async def survey_extract(request: Request, username: str = Depends(require_auth)):
+    """调用当前选择的LLM模型，从上传的文档中提取企业信息，自动填充到体系调研表单"""
+    import json as _json
+    import re
+    body = await request.json()
+    file_path = body.get("file_path", "")
+    filename = body.get("filename", "")
+    if not file_path or not os.path.exists(file_path):
+        raise HTTPException(status_code=400, detail="文件不存在，请重新上传")
+    try:
+        from app.rag.document import load_document
+        docs = await asyncio.to_thread(load_document, file_path)
+        if not docs:
+            raise HTTPException(status_code=500, detail="无法读取文档内容")
+        doc_text = "\n".join([d.page_content for d in docs[:5]])
+        if len(doc_text) > 8000:
+            doc_text = doc_text[:8000] + "\n...(文档内容已截断)"
+        logger.info(f"[调研提取] 文档={filename}, 文本长度={len(doc_text)}")
+        extract_prompt = '你是一个企业信息提取助手。请从以下文档内容中提取企业体系调研所需的信息。\n\n请严格按照以下JSON格式输出，只输出JSON，不要有任何其他文字。如果某个字段在文档中找不到，对应的值设为空字符串。\n\n{"company_name":"公司全称","certs":["ISO9001"],"cert_other":"其他证书","chairman":"董事长","legal_rep":"法人代表","gm":"总经理","deputy_gm":"副总经理","mgmt_rep":"管理者代表","leader_group_leader":"贯标组长","leader_group_members":"组员","iso_office_head":"贯标办主任","iso_office_members":"成员","auditors":"内审员","products":"体系覆盖产品","process_flow":"生产流程","location":"地理位置","area":"占地面积","building_area":"建筑面积","staff_total":"正式员工人数","staff_mgmt":"管理技术人员","staff_edu":"中专以上人数","equipment":"设备情况","customers":"主要客户","address":"公司地址","contact":"联系人","phone":"电话","fax":"传真","mobile":"手机","purpose":"公司宗旨","quality_policy":"质量方针","quality_goal":"质量目标","design_dev":"有无设计开发","org":{"综合管理":{"dept":"部门","head":"负责人"},"研发技术":{"dept":"部门","head":"负责人"},"采购":{"dept":"部门","head":"负责人"},"市场":{"dept":"部门","head":"负责人"},"财务":{"dept":"部门","head":"负责人"},"制造生产":{"dept":"部门","head":"负责人"},"质量":{"dept":"部门","head":"负责人"}}}\n\n文档内容：\n'
+        from app.agent.core import create_llm
+        from langchain_core.messages import HumanMessage, SystemMessage
+        llm = create_llm(short_response=True)
+        messages = [
+            SystemMessage(content="你是企业信息提取助手，只输出JSON格式结果，不要输出其他任何文字。"),
+            HumanMessage(content=extract_prompt + doc_text)
+        ]
+        response = await llm.ainvoke(messages)
+        ai_text = response.content.strip()
+        json_match = re.search(r'\{[\s\S]*\}', ai_text)
+        if not json_match:
+            raise HTTPException(status_code=500, detail="AI返回格式异常，无法解析")
+        json_str = json_match.group(0)
+        json_str = json_str.replace('```json', '').replace('```', '').strip()
+        try:
+            fields = _json.loads(json_str)
+        except _json.JSONDecodeError as e:
+            logger.error(f"[调研提取] JSON解析失败: {e}")
+            raise HTTPException(status_code=500, detail="AI提取的信息格式异常")
+        logger.info(f"[调研提取] 成功提取 {len(fields)} 个字段")
+        try:
+            os.remove(file_path)
+            logger.info(f"[调研提取] 已删除临时文件: {file_path}")
+        except:
+            pass
+        return {"success": True, "fields": fields}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"[调研提取] 异常: {e}")
+        try:
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
+        except:
+            pass
+        raise HTTPException(status_code=500, detail=f"提取失败: {str(e)}")
+
+
 # ===== 智能体知识库管理接口 =====
 
 
