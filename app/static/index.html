@@ -316,16 +316,18 @@
                 <div class="kb-layout">
                     <!-- 左列：分类 -->
                     <div class="kb-cat-col">
-                        <div class="kb-cat-header">
-                            <span>📁 文件分类</span>
-                            <button class="kb-cat-add-btn" onclick="addKbCategory()" title="新建分类">＋</button>
-                        </div>
-                        <div class="kb-cat-list" id="kbCatList">
-                            <button class="kb-cat-item active" onclick="selectKbCategory('手册', this)">📄 手册</button>
-                            <button class="kb-cat-item" onclick="selectKbCategory('程序文件', this)">📋 程序文件</button>
-                            <button class="kb-cat-item" onclick="selectKbCategory('三层次文件', this)">📝 三层次文件</button>
-                            <button class="kb-cat-item" onclick="selectKbCategory('记录表格', this)">📊 记录表格</button>
-                            <button class="kb-cat-item" onclick="selectKbCategory('其他', this)">📂 其他</button>
+                        <div class="kb-cat-panel">
+                            <div class="kb-cat-header">
+                                <span>文件分类</span>
+                                <button class="kb-cat-add-btn" onclick="addKbCategory()" title="新建分类">+</button>
+                            </div>
+                            <div class="kb-cat-list" id="kbCatList">
+                                <button class="kb-cat-item active" onclick="selectKbCategory('手册', this)">手册</button>
+                                <button class="kb-cat-item" onclick="selectKbCategory('程序文件', this)">程序文件</button>
+                                <button class="kb-cat-item" onclick="selectKbCategory('三层次文件', this)">三层次文件</button>
+                                <button class="kb-cat-item" onclick="selectKbCategory('记录表格', this)">记录表格</button>
+                                <button class="kb-cat-item" onclick="selectKbCategory('其他', this)">其他</button>
+                            </div>
                         </div>
                     </div>
                     <!-- 右列：文件列表 -->
