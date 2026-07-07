@@ -3166,6 +3166,20 @@ function saveSurveyDraft() {
     showToast('💾 草稿已暂存', 2000);
 }
 
+function clearSurveyData() {
+    if (!confirm('确认清空所有填写内容？此操作不可恢复。')) return;
+    // 清空所有文本输入
+    const inputs = document.querySelectorAll('#surveyPage input[type="text"], #surveyPage input[type="date"], #surveyPage textarea, #surveyPage select');
+    inputs.forEach(inp => inp.value = '');
+    // 清空复选框
+    document.querySelectorAll('#surveyPage input[type="checkbox"]').forEach(cb => cb.checked = false);
+    // 清空机构设置表格
+    document.querySelectorAll('#sv_org_table input[type="text"]').forEach(inp => inp.value = '');
+    // 删除 localStorage
+    localStorage.removeItem('surveyData');
+    showToast('已清空所有填写内容', 2000);
+}
+
 function loadSurveyData() {
     const saved = localStorage.getItem('surveyData');
     if (!saved) return;
