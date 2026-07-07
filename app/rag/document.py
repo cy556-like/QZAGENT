@@ -1470,7 +1470,7 @@ def split_documents(docs: list, chunk_size: int = 800, chunk_overlap: int = 200,
     return clean_chunks
 
 
-def index_document(file_path: str, filename: str = None, agent_id: str = None) -> dict:
+def index_document(file_path: str, filename: str = None, agent_id: str = None, category: str = None) -> dict:
     """
     完整的文档索引流程：加载 → 分块 → 索引存储
 
@@ -1497,6 +1497,8 @@ def index_document(file_path: str, filename: str = None, agent_id: str = None) -
     # 2. 给文档添加元数据
     for doc in docs:
         doc.metadata["source_file"] = filename
+        if category:
+            doc.metadata["category"] = category
 
     # 3. 分块（传入 filename，MD 文件自动使用标题层级切片）
     chunks = split_documents(docs, filename=filename)
@@ -2674,7 +2676,7 @@ def get_document_content(filename: str, agent_id: str = None) -> dict:
         }
 
 
-def list_indexed_documents(agent_id: str = None) -> list[str]:
+def list_indexed_documents(agent_id: str = None, category: str = None) -> list[str]:
     """列出知识库中所有已索引的文档（按 agent_id 隔离）
 
     [#11] 同时检查向量索引、关键词索引和磁盘文件，合并结果
@@ -2702,7 +2704,12 @@ def list_indexed_documents(agent_id: str = None) -> list[str]:
             all_docs = collection.get(include=["metadatas"])
             for meta in all_docs["metadatas"]:
                 if meta and "source_file" in meta:
-                    sources.add(meta["source_file"])
+                    # 按 category 过滤
+                    if category:
+                        if meta.get("category") == category:
+                            sources.add(meta["source_file"])
+                    else:
+                        sources.add(meta["source_file"])
         except Exception:
             pass
 
@@ -2710,7 +2717,11 @@ def list_indexed_documents(agent_id: str = None) -> list[str]:
     keyword_docs = _load_keyword_index(agent_id)
     for entry in keyword_docs:
         if entry.get("source_file"):
-            sources.add(entry["source_file"])
+            if category:
+                if entry.get("category") == category:
+                    sources.add(entry["source_file"])
+            else:
+                sources.add(entry["source_file"])
 
     # 3. 磁盘文件扫描（兜底：确保文件存在但索引丢失时仍可见）
     if agent_id == "__external__":
@@ -2732,13 +2743,23 @@ def list_indexed_documents(agent_id: str = None) -> list[str]:
                     if ext in {'.pdf', '.txt', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}:
                         sources.add(item)
                 elif os.path.isdir(item_path):
-                    # 分类子目录
-                    for fname in os.listdir(item_path):
-                        ext = os.path.splitext(fname)[1].lower()
-                        if ext in {'.pdf', '.txt', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}:
-                            file_path = os.path.join(item_path, fname)
-                            if os.path.isfile(file_path):
-                                sources.add(fname)
+                    # 分类子目录：如果指定了 category，只扫该分类
+                    if category:
+                        if item == category:
+                            for fname in os.listdir(item_path):
+                                ext = os.path.splitext(fname)[1].lower()
+                                if ext in {'.pdf', '.txt', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}:
+                                    file_path = os.path.join(item_path, fname)
+                                    if os.path.isfile(file_path):
+                                        sources.add(fname)
+                    else:
+                        # 没指定 category，扫所有分类
+                        for fname in os.listdir(item_path):
+                            ext = os.path.splitext(fname)[1].lower()
+                            if ext in {'.pdf', '.txt', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}:
+                                file_path = os.path.join(item_path, fname)
+                                if os.path.isfile(file_path):
+                                    sources.add(fname)
     else:
         scan_dir = settings.DOCUMENTS_DIR
         if os.path.exists(scan_dir):
