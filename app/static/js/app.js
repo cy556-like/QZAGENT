@@ -197,13 +197,13 @@ async function saveAgents() {
                 const mergedAgents = data.agents.map(serverAgent => {
                     const local = localMap[serverAgent.id];
                     if (!local) return { ...serverAgent, chat_ids: [] };
-                    const useServer = _resolveMergeDirection(local, serverAgent);
+                    // 强制使用服务器名称和task，不用本地的（防止旧名称覆盖新名称）
                     return {
                         ...serverAgent,
-                        name: useServer ? serverAgent.name : (local.name || serverAgent.name),
-                        task: useServer ? serverAgent.task : (local.task || serverAgent.task),
+                        name: serverAgent.name,
+                        task: serverAgent.task,
                         summary: local.summary || serverAgent.summary || '',
-                        updated_at: useServer ? (serverAgent.updated_at || null) : (local.updated_at || null),
+                        updated_at: serverAgent.updated_at || null,
                         chat_ids: local.chat_ids || []
                     };
                 });
@@ -246,14 +246,13 @@ async function syncAgentsFromServer(force = false) {
             const mergedAgents = serverAgents.map(serverAgent => {
                 const local = localMap[serverAgent.id];
                 if (!local) return { ...serverAgent, chat_ids: [] };
-                const useServer = _resolveMergeDirection(local, serverAgent);
-                if (!useServer) localHasNewer = true; // 本地有更新的数据
+                // 强制使用服务器名称和task，不用本地的（防止旧名称覆盖新名称）
                 return {
                     ...serverAgent,
-                    name: useServer ? serverAgent.name : (local.name || serverAgent.name),
-                    task: useServer ? serverAgent.task : (local.task || serverAgent.task),
+                    name: serverAgent.name,
+                    task: serverAgent.task,
                     summary: local.summary || serverAgent.summary || '',
-                    updated_at: useServer ? (serverAgent.updated_at || null) : (local.updated_at || null),
+                    updated_at: serverAgent.updated_at || null,
                     chat_ids: local.chat_ids || []
                 };
             });
