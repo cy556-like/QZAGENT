@@ -1086,8 +1086,8 @@ window.addEventListener('popstate', function(e) {
     const chatContent = document.getElementById('chatContent');
     const sidebar = document.getElementById('sidebar');
 
-    // 处理帮助页面和外部知识库页面的后退
-    if (e.state && (e.state.page === 'help' || e.state.page === 'external_kb')) {
+    // 处理调研表单/帮助/外部知识库页面的后退
+    if (e.state && (e.state.page === 'survey' || e.state.page === 'help' || e.state.page === 'external_kb')) {
         // 前进到帮助/外部知识库页面（用户按了前进按钮）
         if (currentUser && authToken) {
             loginModal.classList.remove('show');
@@ -1098,9 +1098,18 @@ window.addEventListener('popstate', function(e) {
             if (e.state.page === 'help') {
                 if (helpPage) helpPage.style.display = '';
                 if (externalKbPage) externalKbPage.style.display = 'none';
-            } else {
+                const surveyPage = document.getElementById('surveyPage');
+                if (surveyPage) surveyPage.style.display = 'none';
+            } else if (e.state.page === 'external_kb') {
                 if (externalKbPage) externalKbPage.style.display = '';
                 if (helpPage) helpPage.style.display = 'none';
+                const surveyPage = document.getElementById('surveyPage');
+                if (surveyPage) surveyPage.style.display = 'none';
+            } else if (e.state.page === 'survey') {
+                const surveyPage = document.getElementById('surveyPage');
+                if (surveyPage) surveyPage.style.display = 'block';
+                if (helpPage) helpPage.style.display = 'none';
+                if (externalKbPage) externalKbPage.style.display = 'none';
             }
         } else {
             history.replaceState({page: 'login'}, '');
@@ -1132,6 +1141,8 @@ window.addEventListener('popstate', function(e) {
             if (kbPage) kbPage.style.display = 'none';
             if (helpPage) helpPage.style.display = 'none';
             if (externalKbPage) externalKbPage.style.display = 'none';
+            const surveyPage = document.getElementById('surveyPage');
+            if (surveyPage) surveyPage.style.display = 'none';
             if (chatContent) chatContent.style.display = 'flex';
             if (sidebar) sidebar.style.display = '';
         } else {
@@ -2875,6 +2886,166 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ===== Knowledge Base Full Page =====
+// ===== 体系调研表单 =====
+function showSurveyForm() {
+    const surveyPage = document.getElementById('surveyPage');
+    const chatContent = document.getElementById('chatContent');
+    const kbPage = document.getElementById('kbPage');
+    const helpPage = document.getElementById('helpPage');
+    const externalKbPage = document.getElementById('externalKbPage');
+    if (kbPage) kbPage.style.display = 'none';
+    if (helpPage) helpPage.style.display = 'none';
+    if (externalKbPage) externalKbPage.style.display = 'none';
+    if (chatContent) chatContent.style.display = 'none';
+    if (surveyPage) {
+        surveyPage.style.display = 'block';
+        loadSurveyData();
+    }
+    // 选中智能体
+    currentAgentId = 'dfmea-risk-agent';
+    currentMode = 'agent';
+    localStorage.setItem('chatMode', 'agent');
+    updateGenButtonsVisibility();
+    updateHeaderKbVisibility();
+    renderMyAgents();
+    // push history
+    history.pushState({page: 'survey'}, '');
+}
+
+function hideSurveyForm() {
+    const surveyPage = document.getElementById('surveyPage');
+    const chatContent = document.getElementById('chatContent');
+    if (surveyPage) surveyPage.style.display = 'none';
+    if (chatContent) chatContent.style.display = 'flex';
+    window._navigatingFromSurvey = true;
+    history.back();
+}
+
+function collectSurveyData() {
+    const data = {};
+    // 文本字段
+    const textFields = [
+        'sv_company_name', 'sv_cert_other', 'sv_chairman', 'sv_legal_rep',
+        'sv_gm', 'sv_deputy_gm', 'sv_mgmt_rep',
+        'sv_leader_group_leader', 'sv_leader_group_members',
+        'sv_iso_office_head', 'sv_iso_office_members', 'sv_auditors',
+        'sv_products', 'sv_process_flow',
+        'sv_location', 'sv_area', 'sv_building_area',
+        'sv_staff_total', 'sv_staff_mgmt', 'sv_staff_edu',
+        'sv_equipment', 'sv_customers',
+        'sv_address', 'sv_contact', 'sv_phone', 'sv_fax', 'sv_mobile',
+        'sv_purpose', 'sv_quality_policy', 'sv_quality_goal',
+        'sv_cert_date', 'sv_audit_date', 'sv_rest_day', 'sv_design_dev',
+        'sv_filler_name', 'sv_filler_phone'
+    ];
+    textFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) data[id] = el.value;
+    });
+    // 证书复选框
+    const certs = [];
+    document.querySelectorAll('.sv_cert:checked').forEach(cb => certs.push(cb.value));
+    if (data.sv_cert_other) certs.push(data.sv_cert_other);
+    data.sv_certs = certs;
+    // 机构设置表格
+    data.sv_org = {};
+    document.querySelectorAll('#sv_org_table input[type="text"]').forEach(inp => {
+        data.sv_org[inp.getAttribute('data-field')] = inp.value;
+    });
+    return data;
+}
+
+function saveSurveyData() {
+    const data = collectSurveyData();
+    // 验证必填字段
+    if (!data.sv_company_name) { showToast('请填写公司名称', 3000); return; }
+    if (!data.sv_products) { showToast('请填写体系覆盖的产品', 3000); return; }
+    if (!data.sv_filler_name) { showToast('请填写填写人姓名', 3000); return; }
+    if (!data.sv_filler_phone) { showToast('请填写填写人手机', 3000); return; }
+    // 保存
+    localStorage.setItem('surveyData', JSON.stringify(data));
+    showToast('✓ 体系调研信息已保存，现在可以一键生成文档', 3000);
+    hideSurveyForm();
+}
+
+function saveSurveyDraft() {
+    const data = collectSurveyData();
+    localStorage.setItem('surveyData', JSON.stringify(data));
+    showToast('💾 草稿已暂存', 2000);
+}
+
+function loadSurveyData() {
+    const saved = localStorage.getItem('surveyData');
+    if (!saved) return;
+    try {
+        const data = JSON.parse(saved);
+        // 文本字段
+        Object.keys(data).forEach(key => {
+            if (key === 'sv_certs' || key === 'sv_org') return;
+            const el = document.getElementById(key);
+            if (el) el.value = data[key];
+        });
+        // 证书复选框
+        if (data.sv_certs) {
+            document.querySelectorAll('.sv_cert').forEach(cb => {
+                cb.checked = data.sv_certs.includes(cb.value);
+            });
+        }
+        // 机构设置
+        if (data.sv_org) {
+            Object.keys(data.sv_org).forEach(field => {
+                const inp = document.querySelector('#sv_org_table input[data-field="' + field + '"]');
+                if (inp) inp.value = data.sv_org[field];
+            });
+        }
+    } catch(e) {
+        console.warn('加载调研数据失败:', e);
+    }
+}
+
+function getSurveyData() {
+    const saved = localStorage.getItem('surveyData');
+    if (!saved) return null;
+    try {
+        return JSON.parse(saved);
+    } catch(e) {
+        return null;
+    }
+}
+
+function formatSurveyDataForAI() {
+    const data = getSurveyData();
+    if (!data) return '';
+    let text = '【体系调研信息】\n';
+    text += '公司名称: ' + (data.sv_company_name || '未填写') + '\n';
+    text += '认证证书: ' + ((data.sv_certs || []).join(', ')) + '\n';
+    text += '董事长: ' + (data.sv_chairman || '') + '  法人代表: ' + (data.sv_legal_rep || '') + '\n';
+    text += '总经理: ' + (data.sv_gm || '') + '  副总经理: ' + (data.sv_deputy_gm || '') + '\n';
+    text += '管理者代表: ' + (data.sv_mgmt_rep || '') + '\n';
+    text += '体系覆盖产品: ' + (data.sv_products || '') + '\n';
+    text += '生产流程: ' + (data.sv_process_flow || '') + '\n';
+    text += '公司地址: ' + (data.sv_address || '') + '\n';
+    text += '联系人: ' + (data.sv_contact || '') + '  手机: ' + (data.sv_mobile || '') + '\n';
+    text += '占地面积: ' + (data.sv_area || '') + '㎡  建筑面积: ' + (data.sv_building_area || '') + '㎡\n';
+    text += '正式员工: ' + (data.sv_staff_total || '') + '人  管理技术人员: ' + (data.sv_staff_mgmt || '') + '人\n';
+    text += '公司宗旨: ' + (data.sv_purpose || '') + '\n';
+    text += '质量方针: ' + (data.sv_quality_policy || '') + '\n';
+    text += '质量目标: ' + (data.sv_quality_goal || '') + '\n';
+    text += '有无设计开发: ' + (data.sv_design_dev || '') + '\n';
+    text += '填写人: ' + (data.sv_filler_name || '') + '  手机: ' + (data.sv_filler_phone || '') + '\n';
+    // 机构设置
+    if (data.sv_org) {
+        text += '\n机构设置:\n';
+        Object.keys(data.sv_org).forEach(k => {
+            if (data.sv_org[k] && k.endsWith('_dept')) {
+                const funcName = k.replace('_dept', '').replace('org_', '');
+                text += '  ' + funcName + ': ' + data.sv_org[k] + ' (负责人: ' + (data.sv_org[k.replace('_dept','_head')] || '') + ')\n';
+            }
+        });
+    }
+    return text;
+}
+
 // ===== 一键生成文档 =====
 function generateDocument(type) {
     const typeMap = {
@@ -2885,13 +3056,22 @@ function generateDocument(type) {
         'rectification': '不合格项整改'
     };
     const typeName = typeMap[type] || type;
+    // 检查是否已填写体系调研
+    const surveyData = getSurveyData();
+    if (!surveyData) {
+        showToast('请先点击"填写体系调研"填写企业信息', 3000);
+        showSurveyForm();
+        return;
+    }
     const input = document.getElementById('msgInput');
     if (input) {
-        input.value = '请' + typeName + '。基于我填写的体系调研信息，生成完整的' + typeName + '。';
+        // 把调研数据格式化后加入消息
+        const surveyText = formatSurveyDataForAI();
+        input.value = '请' + typeName + '。\n\n' + surveyText + '\n\n基于以上体系调研信息，生成完整的' + typeName + '。';
         autoResize(input);
         input.focus();
     }
-    showToast('已填入"' + typeName + '"请求，点击发送按钮开始生成', 3000);
+    showToast('已填入"' + typeName + '"请求（含调研数据），点击发送按钮开始生成', 3000);
 }
 
 // ===== 生成按钮显示/隐藏逻辑 =====
