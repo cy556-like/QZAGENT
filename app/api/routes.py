@@ -1018,7 +1018,7 @@ async def chat_with_file_stream(
 
             try:
 
-                index_result = await asyncio.to_thread(index_document, file_path, decoded_filename, agent_id=agent_id)
+                index_result = await asyncio.to_thread(index_document, file_path, decoded_filename, agent_id=agent_id, category=category)
 
                 indexing_mode = index_result.get('indexing_mode', 'unknown')
 
@@ -1310,17 +1310,7 @@ async def list_documents(
 
 
 
-    docs = list_indexed_documents(agent_id=agent_id)
-
-    # 按分类过滤
-    if category:
-        import os as _os
-        cat_dir = _os.path.join(settings.DOCUMENTS_DIR, f"agent_{agent_id}", category)
-        if _os.path.exists(cat_dir):
-            cat_files = set(_os.listdir(cat_dir))
-            docs = [d for d in docs if d in cat_files]
-        else:
-            docs = []
+    docs = list_indexed_documents(agent_id=agent_id, category=category)
 
     # 额外扫描：list_indexed_documents 已扫描 .pdf/.txt/.docx，
 
