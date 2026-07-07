@@ -55,8 +55,8 @@ function sortAgentsByFixedOrder(agents) {
 // 每个智能体的欢迎页配置（名称、描述、推荐问题）
 const AGENT_WELCOME_CONFIG = {
     'dfmea-risk-agent': {
-        name: '填写体系调研',
-        desc: '填写企业信息（公司名称、体系范围、组织架构、过程清单等），系统自动生成体系调研报告',
+        name: '全质体系智能体',
+        desc: '体系调研完毕，请点击左边侧边栏的按钮（如：一键生成智能手册），系统将自动生成需要的文件',
         questions: []
     },
 };
@@ -84,7 +84,7 @@ function forceCorrectAgents() {
     existing.forEach(a => { existingMap[a.id] = a; });
 
     const defaults = {
-        'dfmea-risk-agent': { name: '填写体系调研', task: '你是体系智能体的填写体系调研模块。用户通过填写企业信息，系统自动生成规范化的体系调研报告，作为后续一键生成手册、程序文件、三层次文件、记录表格和不合格项整改的基础数据。', summary: '填写体系调研' }
+        'dfmea-risk-agent': { name: '全质体系智能体', task: '你是体系智能体的填写体系调研模块。用户通过填写企业信息，系统自动生成规范化的体系调研报告，作为后续一键生成手册、程序文件、三层次文件、记录表格和不合格项整改的基础数据。', summary: '全质体系智能体' }
     };
 
     const correctAgents = Object.keys(defaults).map(id => {
