@@ -745,8 +745,15 @@ async function restoreModeChat() {
     const modeChats = getModeChats();
     const savedId = modeChatId[currentMode];
     if (modeChats.length === 0) {
-        // 该模式没有会话，新建一个
-        await createNewChat();
+        // 该模式没有会话，不新建，显示空白或调研表单
+        const hasSurvey = localStorage.getItem('surveyData');
+        if (!hasSurvey) {
+            showSurveyForm();
+        } else {
+            clearChatUI();
+            const welcomeEl = document.getElementById('welcomeCenter');
+            if (welcomeEl) welcomeEl.style.display = '';
+        }
     } else if (savedId && modeChats.some(c => c.chat_id === savedId)) {
         // 恢复上次该模式的会话
         currentChatId = savedId;
@@ -1601,10 +1608,20 @@ async function deleteChatItem(chatId) {
             clearChatUI();
         }
         await loadChatList();
-        // 如果当前模式没有会话了，新建一个
+        // 如果当前模式没有会话了，不自动创建新对话
         const modeChats = getModeChats();
         if (modeChats.length === 0) {
-            await createNewChat();
+            // 检查是否已填写调研
+            const hasSurvey = localStorage.getItem('surveyData');
+            if (!hasSurvey) {
+                // 未填调研 → 显示填写表单
+                showSurveyForm();
+            } else {
+                // 已填调研 → 显示空白聊天界面
+                clearChatUI();
+                const welcomeEl = document.getElementById('welcomeCenter');
+                if (welcomeEl) welcomeEl.style.display = '';
+            }
         }
     } catch (e) { console.error('删除会话失败', e); }
 }
