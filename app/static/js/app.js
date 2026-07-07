@@ -2575,6 +2575,7 @@ async function uploadToKnowledgeBase(file) {
     const formData = new FormData();
     formData.append('file', file);
     if (currentAgentId) formData.append('agent_id', currentAgentId);
+    formData.append('category', currentKbCategory || '');
     try {
         barFill.style.width = '30%';
         const resp = await fetch('/api/v1/upload', { method: 'POST', body: formData, headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {} });
@@ -3691,6 +3692,20 @@ async function loadKbPageDocs() {
         let docs = data.documents || data.files || [];
         if (!Array.isArray(docs)) docs = [];
         docs = docs.map(d => typeof d === 'string' ? d : (d.filename || d.name || d.title || String(d)));
+        // 按分类过滤：通过 API 查询当前分类目录下的文件
+        if (currentKbCategory) {
+            try {
+                const catResp = await fetch('/api/v1/documents?agent_id=' + encodeURIComponent(currentAgentId) + '&category=' + encodeURIComponent(currentKbCategory), { headers: apiHeaders() });
+                if (catResp.ok) {
+                    const catData = await catResp.json();
+                    let catDocs = catData.documents || catData.files || [];
+                    if (Array.isArray(catDocs) && catDocs.length > 0) {
+                        catDocs = catDocs.map(d => typeof d === 'string' ? d : (d.filename || d.name || d.title || String(d)));
+                        docs = catDocs;
+                    }
+                }
+            } catch(e) { console.warn('分类过滤失败:', e); }
+        }
         
         // Update stats
         document.getElementById('kbStatDocCount').textContent = docs.length;
@@ -3768,6 +3783,7 @@ async function uploadToKbPage(file) {
     const formData = new FormData();
     formData.append('file', file);
     if (currentAgentId) formData.append('agent_id', currentAgentId);
+    formData.append('category', currentKbCategory || '');
     try {
         barFill.style.width = '30%';
         const resp = await fetch('/api/v1/upload', { method: 'POST', body: formData, headers: authToken ? { 'Authorization': 'Bearer ' + authToken } : {} });
