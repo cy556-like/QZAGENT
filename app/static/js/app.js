@@ -3392,28 +3392,21 @@ function generateDocument(type) {
         'rectification': '不合格项整改'
     };
     const typeName = typeMap[type] || type;
-    // 检查是否已填写体系调研
     const surveyData = getSurveyData();
     if (!surveyData) {
         showToast('请先点击"填写体系调研"填写企业信息', 3000);
         showSurveyForm();
         return;
     }
-    // 如果还在表单页，先切回聊天
     const surveyPage = document.getElementById('surveyPage');
     if (surveyPage && surveyPage.style.display !== 'none') {
         hideSurveyForm();
     }
-    // 调研数据直接传给后端，不在对话框显示
     const surveyText = formatSurveyDataForAI();
-    // 用户消息只显示简短的指令（不显示调研数据）
-    const displayMessage = '请' + typeName;
-    // 实际发给后端的消息包含调研数据（通过 agent_task 参数传递）
-    addMessageToUI('user', displayMessage);
+    // 不显示任何用户消息，直接创建 AI 回复气泡
     document.getElementById('chatContent').classList.remove('centered');
     const bubble = createStreamingBubble();
     
-    // 直接调用流式 API（绕过输入框）
     (async () => {
         if (isLoading) return;
         isLoading = true;
@@ -3433,7 +3426,7 @@ function generateDocument(type) {
                     web_search: webSearchEnabled,
                     mode: currentMode,
                     deep_think: deepThinkEnabled,
-                    skill: selectedSkill || '',
+                    skill: type,
                     agent_id: currentAgentId || '',
                     agent_task: (currentAgentId && myAgents.find(a => a.id === currentAgentId)) ? myAgents.find(a => a.id === currentAgentId).task : ''
                 })
