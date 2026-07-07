@@ -229,14 +229,9 @@
             <div class="sidebar-brand" id="sidebarBrand"><img class="sidebar-brand-logo" src="/static/images/chat-logo.png" alt="体系智能体"><span class="sidebar-brand-name">体系智能体</span></div>
 
 
-            <div class="sidebar-section-title" id="agentsSectionTitle"><span class="section-title-icon">👉</span><span class="section-title-text">请点击：</span></div>
-
-
-            <div class="sidebar-agents-list" id="myAgentsList"></div>
-        </div>
-        <div class="sidebar-gen-section" id="sidebarGenSection" style="padding:8px 12px; border-top:1px solid #e5e5e5; display:none;">
-            <div class="sidebar-section-title"><span class="section-title-icon">⚡</span><span class="section-title-text">一键生成</span></div>
-            <div class="sidebar-gen-list" id="sidebarGenList">
+            <div class="sidebar-section-title" id="agentsSectionTitle" style="display:none;"><span class="section-title-icon">👉</span><span class="section-title-text">请点击：</span></div>
+            <div class="sidebar-gen-list" id="sidebarGenList" style="padding:0 12px;">
+                <button class="sidebar-gen-btn sidebar-agent-btn" onclick="switchToAgent('dfmea-risk-agent')" title="填写企业体系调研信息">📋 填写体系调研</button>
                 <button class="sidebar-gen-btn" onclick="generateDocument('manual')" title="基于体系调研信息生成质量管理手册">📄 一键生成手册</button>
                 <button class="sidebar-gen-btn" onclick="generateDocument('procedure')" title="基于体系调研信息生成程序文件">📋 一键生成程序文件</button>
                 <button class="sidebar-gen-btn" onclick="generateDocument('third-level')" title="基于体系调研信息生成三层次文件">📝 一键生成三层次文件</button>
