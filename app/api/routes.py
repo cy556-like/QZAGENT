@@ -1122,7 +1122,7 @@ async def chat_with_file_stream(
 
 @router.post("/upload", summary="上传文档到知识库")
 
-async def upload_document(file: UploadFile = File(...), agent_id: str = Form(None), username: str = Depends(require_auth)):
+async def upload_document(file: UploadFile = File(...), agent_id: str = Form(None), category: str = Form(''), username: str = Depends(require_auth)):
 
     """
 
@@ -1187,6 +1187,10 @@ async def upload_document(file: UploadFile = File(...), agent_id: str = Form(Non
     if agent_id:
 
         agent_dir = os.path.join(settings.DOCUMENTS_DIR, f"agent_{agent_id}")
+
+        if category:
+
+            agent_dir = os.path.join(agent_dir, category)
 
         os.makedirs(agent_dir, exist_ok=True)
 
@@ -1268,6 +1272,8 @@ async def list_documents(
 
     agent_id: str = Query(None, description="智能体ID，为空时查全局知识库"),
 
+    category: str = Query(None, description="文件分类（手册/程序文件/三层次文件/记录表格/其他）"),
+
 ):
 
     """获取知识库中所有文档列表（支持分页，按智能体隔离）
@@ -1306,7 +1312,15 @@ async def list_documents(
 
     docs = list_indexed_documents(agent_id=agent_id)
 
-
+    # 按分类过滤
+    if category:
+        import os as _os
+        cat_dir = _os.path.join(settings.DOCUMENTS_DIR, f"agent_{agent_id}", category)
+        if _os.path.exists(cat_dir):
+            cat_files = set(_os.listdir(cat_dir))
+            docs = [d for d in docs if d in cat_files]
+        else:
+            docs = []
 
     # 额外扫描：list_indexed_documents 已扫描 .pdf/.txt/.docx，
 
