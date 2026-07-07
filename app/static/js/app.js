@@ -3399,22 +3399,53 @@ function generateDocument(type) {
         showSurveyForm();
         return;
     }
-    // 检查是否在聊天界面（不在的话先切回去）
+    // 如果还在表单页，先切回聊天
     const surveyPage = document.getElementById('surveyPage');
     if (surveyPage && surveyPage.style.display !== 'none') {
         hideSurveyForm();
     }
-    // 构造消息内容（含调研数据）
+    // 调研数据直接传给后端，不在对话框显示
     const surveyText = formatSurveyDataForAI();
-    const message = '请' + typeName + '。\n\n' + surveyText + '\n\n基于以上体系调研信息，生成完整的' + typeName + '。';
-    // 直接填入输入框并自动发送（不等用户点发送）
-    const input = document.getElementById('msgInput');
-    if (input) {
-        input.value = message;
-        autoResize(input);
-    }
-    // 自动发送
-    sendMessage();
+    // 用户消息只显示简短的指令（不显示调研数据）
+    const displayMessage = '请' + typeName;
+    // 实际发给后端的消息包含调研数据（通过 agent_task 参数传递）
+    addMessageToUI('user', displayMessage);
+    document.getElementById('chatContent').classList.remove('centered');
+    const bubble = createStreamingBubble();
+    
+    // 直接调用流式 API（绕过输入框）
+    (async () => {
+        if (isLoading) return;
+        isLoading = true;
+        if (!currentChatId) {
+            await createNewChat();
+            if (!currentChatId) { isLoading = false; return; }
+        }
+        const sendBtn = document.getElementById('sendBtn');
+        if (sendBtn) sendBtn.disabled = true;
+        try {
+            await streamChat('/api/v1/chat/stream', {
+                method: 'POST',
+                headers: apiHeaders(),
+                body: JSON.stringify({
+                    message: '请' + typeName + '。\n\n' + surveyText + '\n\n基于以上体系调研信息，生成完整的' + typeName + '。',
+                    session_id: currentChatId,
+                    web_search: webSearchEnabled,
+                    mode: currentMode,
+                    deep_think: deepThinkEnabled,
+                    skill: selectedSkill || '',
+                    agent_id: currentAgentId || '',
+                    agent_task: (currentAgentId && myAgents.find(a => a.id === currentAgentId)) ? myAgents.find(a => a.id === currentAgentId).task : ''
+                })
+            }, bubble);
+            await loadChatList();
+            scrollToBottom();
+        } catch (e) {
+            console.error('[生成文档] 失败:', e);
+        } finally {
+            resetStreamingUI();
+        }
+    })();
 }
 
 // ===== 生成按钮显示/隐藏逻辑 =====
