@@ -1448,7 +1448,15 @@ async function loadChatList() {
             // （避免智能体对话回复完成后，因过滤不同步导致跳转到空页面）
             const currentChatStillExists = currentChatId && allChats.some(c => c.chat_id === currentChatId);
             if (modeChats.length === 0 && !currentChatStillExists) {
-                await createNewChat();
+                // 没有会话，不自动创建，根据调研状态显示
+                const hasSurvey = localStorage.getItem('surveyData');
+                if (!hasSurvey) {
+                    showSurveyForm();
+                } else {
+                    clearChatUI();
+                    const welcomeEl = document.getElementById('welcomeCenter');
+                    if (welcomeEl) welcomeEl.style.display = '';
+                }
             } else if (!currentChatId || (!currentChatStillExists && !modeChats.some(c => c.chat_id === currentChatId))) {
                 currentChatId = modeChats[0].chat_id;
                 modeChatId[currentMode] = currentChatId;
