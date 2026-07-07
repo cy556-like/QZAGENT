@@ -12646,3 +12646,193 @@ html { scroll-behavior: smooth; }
 .sidebar-gen-btn:active {
     transform: translateX(0) scale(0.98);
 }
+
+
+/* ===== 体系调研表单页面 ===== */
+.survey-page {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    background: #f5f7fa;
+    padding: 0;
+}
+.survey-header {
+    background: linear-gradient(135deg, #15589B 0%, #0F467A 100%);
+    color: #fff;
+    padding: 24px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.survey-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+}
+.survey-header p {
+    font-size: 13px;
+    opacity: 0.85;
+    margin: 0;
+}
+.survey-body {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 40px 80px;
+}
+.survey-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.survey-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #15589B;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e8f0fe;
+}
+.survey-field {
+    margin-bottom: 14px;
+}
+.survey-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+}
+.survey-field .required {
+    color: #e63946;
+}
+.survey-field input[type="text"],
+.survey-field input[type="date"],
+.survey-field textarea,
+.survey-field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #d0d5dd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    background: #fff;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+.survey-field input:focus,
+.survey-field textarea:focus,
+.survey-field select:focus {
+    border-color: #15589B;
+    box-shadow: 0 0 0 3px rgba(21, 88, 155, 0.1);
+    outline: none;
+}
+.survey-field textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+.survey-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+.survey-row .survey-field {
+    flex: 1;
+    margin-bottom: 0;
+}
+.checkbox-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+}
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #15589B;
+    cursor: pointer;
+}
+.survey-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.survey-table th {
+    background: #15589B;
+    color: #fff;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+}
+.survey-table td {
+    padding: 6px 12px;
+    border-bottom: 1px solid #e8e8e8;
+}
+.survey-table td:first-child {
+    font-weight: 600;
+    color: #555;
+    white-space: nowrap;
+}
+.survey-table input[type="text"] {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 13px;
+}
+.survey-table input:focus {
+    border-color: #15589B;
+    outline: none;
+}
+.survey-submit-area {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 24px;
+    padding-bottom: 40px;
+}
+.survey-submit-btn {
+    padding: 14px 48px;
+    background: #15589B;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 2px;
+}
+.survey-submit-btn:hover {
+    background: #0F467A;
+    box-shadow: 0 6px 20px rgba(21, 88, 155, 0.3);
+    transform: translateY(-1px);
+}
+.survey-draft-btn {
+    padding: 14px 32px;
+    background: #fff;
+    color: #15589B;
+    border: 1.5px solid #15589B;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+.survey-draft-btn:hover {
+    background: #f0f7ff;
+}
+@media (max-width: 768px) {
+    .survey-body { padding: 16px; }
+    .survey-row { flex-direction: column; gap: 0; }
+    .survey-row .survey-field { margin-bottom: 14px; }
+}
