@@ -12607,3 +12607,42 @@ html { scroll-behavior: smooth; }
 }
 
 
+
+
+/* ===== 侧边栏一键生成按钮 ===== */
+.sidebar-gen-section {
+    padding: 8px 12px;
+    border-top: 1px solid var(--border-sidebar);
+}
+.sidebar-gen-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+.sidebar-gen-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #f0f7ff;
+    border: 1px solid #c5d9f0;
+    border-radius: 8px;
+    color: #15589B;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    width: 100%;
+}
+.sidebar-gen-btn:hover {
+    background: #15589B;
+    color: #FFFFFF;
+    border-color: #15589B;
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(21, 88, 155, 0.2);
+}
+.sidebar-gen-btn:active {
+    transform: translateX(0) scale(0.98);
+}
