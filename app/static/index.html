@@ -231,7 +231,7 @@
 
             <div class="sidebar-section-title" id="agentsSectionTitle" style="display:none;"><span class="section-title-icon">👉</span><span class="section-title-text">请点击：</span></div>
             <div class="sidebar-gen-list" id="sidebarGenList" style="padding:0 12px;">
-                <button class="sidebar-gen-btn sidebar-agent-btn" onclick="switchToAgent('dfmea-risk-agent')" title="填写企业体系调研信息">📋 填写体系调研</button>
+                <button class="sidebar-gen-btn sidebar-agent-btn" onclick="showSurveyForm()" title="填写企业体系调研信息">📋 填写体系调研</button>
                 <button class="sidebar-gen-btn" onclick="generateDocument('manual')" title="基于体系调研信息生成质量管理手册">📄 一键生成手册</button>
                 <button class="sidebar-gen-btn" onclick="generateDocument('procedure')" title="基于体系调研信息生成程序文件">📋 一键生成程序文件</button>
                 <button class="sidebar-gen-btn" onclick="generateDocument('third-level')" title="基于体系调研信息生成三层次文件">📝 一键生成三层次文件</button>
@@ -426,6 +426,160 @@
 
         </div>
 
+
+        <div class="survey-page" id="surveyPage" style="display:none;">
+            <div class="survey-header">
+                <h2>📋 体系调研表</h2>
+                <p>请填写以下企业信息，填写完毕后可一键生成体系文件</p>
+            </div>
+            <div class="survey-body">
+
+                <!-- Section 1: 基本信息 -->
+                <div class="survey-section">
+                    <h3 class="survey-section-title">一、基本信息</h3>
+                    <div class="survey-field">
+                        <label>1. 公司名称 <span class="required">*</span></label>
+                        <input type="text" id="sv_company_name" placeholder="请输入公司全称">
+                    </div>
+                    <div class="survey-field">
+                        <label>2. 需要取得的证书 <span class="required">*</span></label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" value="ISO9001" class="sv_cert"> ISO9001</label>
+                            <label class="checkbox-item"><input type="checkbox" value="IATF16949" class="sv_cert"> IATF16949</label>
+                            <label class="checkbox-item"><input type="checkbox" value="ISO14001" class="sv_cert"> ISO14001</label>
+                            <label class="checkbox-item"><input type="checkbox" value="ISO45001" class="sv_cert"> ISO45001</label>
+                        </div>
+                        <input type="text" id="sv_cert_other" placeholder="其他证书请填写" style="margin-top:8px;">
+                    </div>
+                </div>
+
+                <!-- Section 2: 领导层信息 -->
+                <div class="survey-section">
+                    <h3 class="survey-section-title">二、领导层信息</h3>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>3. 董事长</label><input type="text" id="sv_chairman" placeholder="姓名"></div>
+                        <div class="survey-field"><label>法人代表</label><input type="text" id="sv_legal_rep" placeholder="姓名"></div>
+                    </div>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>总经理</label><input type="text" id="sv_gm" placeholder="姓名"></div>
+                        <div class="survey-field"><label>副总经理</label><input type="text" id="sv_deputy_gm" placeholder="姓名"></div>
+                    </div>
+                    <div class="survey-field"><label>4. 管理者代表姓名</label><input type="text" id="sv_mgmt_rep" placeholder="姓名"></div>
+                </div>
+
+                <!-- Section 3: 机构设置 -->
+                <div class="survey-section">
+                    <h3 class="survey-section-title">三、机构设置情况</h3>
+                    <table class="survey-table" id="sv_org_table">
+                        <thead><tr><th>职能</th><th>部门名称</th><th>负责人姓名</th></tr></thead>
+                        <tbody>
+                            <tr><td>综合管理</td><td><input type="text" data-field="org_综合管理_dept"></td><td><input type="text" data-field="org_综合管理_head"></td></tr>
+                            <tr><td>研发/技术</td><td><input type="text" data-field="org_研发技术_dept"></td><td><input type="text" data-field="org_研发技术_head"></td></tr>
+                            <tr><td>采购</td><td><input type="text" data-field="org_采购_dept"></td><td><input type="text" data-field="org_采购_head"></td></tr>
+                            <tr><td>市场</td><td><input type="text" data-field="org_市场_dept"></td><td><input type="text" data-field="org_市场_head"></td></tr>
+                            <tr><td>财务</td><td><input type="text" data-field="org_财务_dept"></td><td><input type="text" data-field="org_财务_head"></td></tr>
+                            <tr><td>制造/生产</td><td><input type="text" data-field="org_制造生产_dept"></td><td><input type="text" data-field="org_制造生产_head"></td></tr>
+                            <tr><td>质量</td><td><input type="text" data-field="org_质量_dept"></td><td><input type="text" data-field="org_质量_head"></td></tr>
+                            <tr><td>其他部门</td><td><input type="text" data-field="org_其他1_dept"></td><td><input type="text" data-field="org_其他1_head"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Section 4: 贯标团队 -->
+                <div class="survey-section">
+                    <h3 class="survey-section-title">四、贯标团队</h3>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>6. 贯标认证领导小组 - 组长</label><input type="text" id="sv_leader_group_leader" placeholder="姓名"></div>
+                        <div class="survey-field"><label>组员</label><input type="text" id="sv_leader_group_members" placeholder="多个姓名用逗号分隔"></div>
+                    </div>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>7. 贯标办主任</label><input type="text" id="sv_iso_office_head" placeholder="姓名"></div>
+                        <div class="survey-field"><label>成员</label><input type="text" id="sv_iso_office_members" placeholder="多个姓名用逗号分隔"></div>
+                    </div>
+                    <div class="survey-field"><label>8. 内审员姓名</label><input type="text" id="sv_auditors" placeholder="多个姓名用逗号分隔"></div>
+                </div>
+
+                <!-- Section 5: 产品信息 -->
+                <div class="survey-section">
+                    <h3 class="survey-section-title">五、产品信息</h3>
+                    <div class="survey-field">
+                        <label>9. 体系覆盖的产品 <span class="required">*</span></label>
+                        <input type="text" id="sv_products" placeholder="证书上出现的产品名称">
+                    </div>
+                    <div class="survey-field">
+                        <label>10. 主导产品生产过程流程图</label>
+                        <textarea id="sv_process_flow" rows="3" placeholder="如：下料→倒角→翻边→弯管→打点→扩口→清洗→烘干→焊接→检漏→喷涂→包装"></textarea>
+                    </div>
+                </div>
+
+                <!-- Section 6: 公司简介 -->
+                <div class="survey-section">
+                    <h3 class="survey-section-title">六、公司简介</h3>
+                    <div class="survey-field">
+                        <label>12-1. 地理位置、自然环境和交通条件</label>
+                        <textarea id="sv_location" rows="2" placeholder="描述公司地理位置及周边环境"></textarea>
+                    </div>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>占地面积（㎡）</label><input type="text" id="sv_area" placeholder="平方米"></div>
+                        <div class="survey-field"><label>建筑面积（㎡）</label><input type="text" id="sv_building_area" placeholder="平方米"></div>
+                    </div>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>正式员工（人）</label><input type="text" id="sv_staff_total" placeholder="人数"></div>
+                        <div class="survey-field"><label>管理技术人员（人）</label><input type="text" id="sv_staff_mgmt" placeholder="人数"></div>
+                        <div class="survey-field"><label>中专以上文化（人）</label><input type="text" id="sv_staff_edu" placeholder="人数"></div>
+                    </div>
+                    <div class="survey-field"><label>设备情况</label><textarea id="sv_equipment" rows="2" placeholder="主要生产设备概述"></textarea></div>
+                    <div class="survey-field"><label>主要客户</label><input type="text" id="sv_customers" placeholder="主要客户名称"></div>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>公司地址</label><input type="text" id="sv_address" placeholder="详细地址"></div>
+                        <div class="survey-field"><label>联系人</label><input type="text" id="sv_contact" placeholder="联系人姓名"></div>
+                    </div>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>电话</label><input type="text" id="sv_phone" placeholder="电话号码"></div>
+                        <div class="survey-field"><label>传真</label><input type="text" id="sv_fax" placeholder="传真号码"></div>
+                        <div class="survey-field"><label>手机</label><input type="text" id="sv_mobile" placeholder="手机号码"></div>
+                    </div>
+                </div>
+
+                <!-- Section 7: 质量方针目标 -->
+                <div class="survey-section">
+                    <h3 class="survey-section-title">七、质量方针与目标</h3>
+                    <div class="survey-field"><label>13. 公司宗旨</label><textarea id="sv_purpose" rows="2" placeholder="如：勤奋 务实 诚信 创新"></textarea></div>
+                    <div class="survey-field"><label>14. 质量方针</label><textarea id="sv_quality_policy" rows="3" placeholder="公司质量方针"></textarea></div>
+                    <div class="survey-field"><label>15. 质量目标</label><textarea id="sv_quality_goal" rows="4" placeholder="产品质量目标、服务质量目标、工作质量目标等"></textarea></div>
+                </div>
+
+                <!-- Section 8: 认证计划 -->
+                <div class="survey-section">
+                    <h3 class="survey-section-title">八、认证计划</h3>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>16. 计划取得认证证书日期</label><input type="date" id="sv_cert_date"></div>
+                        <div class="survey-field"><label>17. 计划审核开始时间（选填）</label><input type="date" id="sv_audit_date"></div>
+                    </div>
+                    <div class="survey-field"><label>18. 周六、周日是否休息</label>
+                        <select id="sv_rest_day"><option value="">请选择</option><option value="周六周日都休息">周六周日都休息</option><option value="仅周日休息">仅周日休息</option><option value="都不休息">都不休息</option><option value="轮休">轮休</option></select>
+                    </div>
+                    <div class="survey-field"><label>19. 有无设计开发？</label>
+                        <select id="sv_design_dev"><option value="">请选择</option><option value="有">有</option><option value="无">无</option></select>
+                    </div>
+                </div>
+
+                <!-- Section 9: 填写人信息 -->
+                <div class="survey-section">
+                    <h3 class="survey-section-title">九、填写人信息</h3>
+                    <div class="survey-row">
+                        <div class="survey-field"><label>填写人姓名 <span class="required">*</span></label><input type="text" id="sv_filler_name" placeholder="姓名"></div>
+                        <div class="survey-field"><label>填写人手机 <span class="required">*</span></label><input type="text" id="sv_filler_phone" placeholder="手机号码"></div>
+                    </div>
+                </div>
+
+                <!-- 提交按钮 -->
+                <div class="survey-submit-area">
+                    <button class="survey-submit-btn" onclick="saveSurveyData()">✓ 填写完毕</button>
+                    <button class="survey-draft-btn" onclick="saveSurveyDraft()">💾 暂存草稿</button>
+                </div>
+            </div>
+        </div>
 
         <div class="kb-page" id="helpPage" style="display:none;">
             <div class="kb-page-header">
