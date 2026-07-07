@@ -3687,25 +3687,12 @@ async function loadKbPageDocs() {
     }
     listEl.innerHTML = '<div class="kb-doc-empty">加载中...</div>';
     try {
-        const resp = await fetch('/api/v1/documents?agent_id=' + encodeURIComponent(currentAgentId), { headers: apiHeaders() });
+        const url = '/api/v1/documents?agent_id=' + encodeURIComponent(currentAgentId) + '&category=' + encodeURIComponent(currentKbCategory || '');
+        const resp = await fetch(url, { headers: apiHeaders() });
         const data = await resp.json();
         let docs = data.documents || data.files || [];
         if (!Array.isArray(docs)) docs = [];
         docs = docs.map(d => typeof d === 'string' ? d : (d.filename || d.name || d.title || String(d)));
-        // 按分类过滤：通过 API 查询当前分类目录下的文件
-        if (currentKbCategory) {
-            try {
-                const catResp = await fetch('/api/v1/documents?agent_id=' + encodeURIComponent(currentAgentId) + '&category=' + encodeURIComponent(currentKbCategory), { headers: apiHeaders() });
-                if (catResp.ok) {
-                    const catData = await catResp.json();
-                    let catDocs = catData.documents || catData.files || [];
-                    if (Array.isArray(catDocs) && catDocs.length > 0) {
-                        catDocs = catDocs.map(d => typeof d === 'string' ? d : (d.filename || d.name || d.title || String(d)));
-                        docs = catDocs;
-                    }
-                }
-            } catch(e) { console.warn('分类过滤失败:', e); }
-        }
         
         // Update stats
         document.getElementById('kbStatDocCount').textContent = docs.length;
