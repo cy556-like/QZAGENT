@@ -1110,6 +1110,8 @@ window.addEventListener('popstate', function(e) {
                 if (surveyPage) surveyPage.style.display = 'block';
                 if (helpPage) helpPage.style.display = 'none';
                 if (externalKbPage) externalKbPage.style.display = 'none';
+                if (kbPage) kbPage.style.display = 'none';
+                if (chatContent) chatContent.style.display = 'none';
             }
         } else {
             history.replaceState({page: 'login'}, '');
@@ -1157,6 +1159,10 @@ window.addEventListener('popstate', function(e) {
             document.body.classList.add('body-chat-mode');
             if (chatContent) chatContent.style.display = 'none';
             if (kbPage) kbPage.style.display = 'flex';
+            const surveyPageEl = document.getElementById('surveyPage');
+            if (surveyPageEl) surveyPageEl.style.display = 'none';
+            if (helpPage) helpPage.style.display = 'none';
+            if (externalKbPage) externalKbPage.style.display = 'none';
             // [BUG FIX] 知识库页隐藏侧边栏
             if (sidebar) sidebar.style.display = 'none';
             const sidebarOverlay = document.getElementById('sidebarOverlay');
