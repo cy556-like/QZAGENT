@@ -38,12 +38,7 @@ let _lastSyncedAgentsHash = '';
 // 允许的智能体ID白名单（与后端 storage.py 保持一致）
 // 顺序即侧边栏固定显示顺序，点击等操作不会改变
 const ALLOWED_AGENT_IDS = [
-    'dfmea-risk-agent',            // 1. 填写体系调研
-    'part-design-agent',           // 2. 一键生成手册
-    'simulation-optimization-agent', // 3. 一键生成程序文件
-    'material-selection-agent',     // 4. 一键生成三层次文件
-    'manufacturing-process-agent',  // 5. 一键生成记录表格
-    'ee-design-agent',             // 6. 不合格项整改
+    'dfmea-risk-agent',            // 唯一智能体：填写体系调研
 ];
 
 // 按 ALLOWED_AGENT_IDS 定义的顺序排序智能体列表（保证侧边栏顺序永远固定）
@@ -61,32 +56,7 @@ function sortAgentsByFixedOrder(agents) {
 const AGENT_WELCOME_CONFIG = {
     'dfmea-risk-agent': {
         name: '填写体系调研',
-        desc: '填写体系调研',
-        questions: []
-    },
-    'part-design-agent': {
-        name: '一键生成手册',
-        desc: '一键生成手册',
-        questions: []
-    },
-    'simulation-optimization-agent': {
-        name: '一键生成程序文件',
-        desc: '一键生成程序文件',
-        questions: []
-    },
-    'material-selection-agent': {
-        name: '一键生成三层次文件',
-        desc: '一键生成三层次文件',
-        questions: []
-    },
-    'manufacturing-process-agent': {
-        name: '一键生成记录表格',
-        desc: '一键生成记录表格',
-        questions: []
-    },
-    'ee-design-agent': {
-        name: '不合格项整改',
-        desc: '不合格项整改',
+        desc: '填写企业信息（公司名称、体系范围、组织架构、过程清单等），系统自动生成体系调研报告',
         questions: []
     },
 };
@@ -114,12 +84,7 @@ function forceCorrectAgents() {
     existing.forEach(a => { existingMap[a.id] = a; });
 
     const defaults = {
-        'dfmea-risk-agent': { name: '填写体系调研', task: '填写体系调研', summary: '填写体系调研' },
-        'part-design-agent': { name: '一键生成手册', task: '一键生成手册', summary: '一键生成手册' },
-        'simulation-optimization-agent': { name: '一键生成程序文件', task: '一键生成程序文件', summary: '一键生成程序文件' },
-        'material-selection-agent': { name: '一键生成三层次文件', task: '一键生成三层次文件', summary: '一键生成三层次文件' },
-        'manufacturing-process-agent': { name: '一键生成记录表格', task: '一键生成记录表格', summary: '一键生成记录表格' },
-        'ee-design-agent': { name: '不合格项整改', task: '不合格项整改', summary: '不合格项整改' }
+        'dfmea-risk-agent': { name: '填写体系调研', task: '你是体系智能体的填写体系调研模块。用户通过填写企业信息，系统自动生成规范化的体系调研报告，作为后续一键生成手册、程序文件、三层次文件、记录表格和不合格项整改的基础数据。', summary: '填写体系调研' }
     };
 
     const correctAgents = Object.keys(defaults).map(id => {
@@ -427,6 +392,7 @@ async function switchToAgent(agentId) {
 
     // Render agents list
     renderMyAgents();
+    updateGenButtonsVisibility();
     
     // 点击智能体：显示空白对话页面（含智能体欢迎信息）
     currentChatId = null;
@@ -590,8 +556,10 @@ function updateHeaderKbVisibility() {
     // 帮助按钮和外部知识库按钮始终显示
     if (helpBtn) helpBtn.style.display = 'inline-flex';
     if (externalKbBtn) externalKbBtn.style.display = 'inline-flex';
-    if (!btn) return;
-    // 只在选中了某个智能体时才显示 header 知识库按钮和 Skills 按钮
+    // 企业内部体系文件按钮始终显示
+    if (btn) btn.style.display = 'inline-flex';
+    // Skills 按钮也始终显示
+    if (skillsWrapper) skillsWrapper.style.display = '';
     if (currentAgentId) {
         btn.style.display = 'inline-flex';
         if (skillsWrapper) skillsWrapper.style.display = 'inline-block';
@@ -2907,6 +2875,34 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ===== Knowledge Base Full Page =====
+// ===== 一键生成文档 =====
+function generateDocument(type) {
+    const typeMap = {
+        'manual': '一键生成手册',
+        'procedure': '一键生成程序文件',
+        'third-level': '一键生成三层次文件',
+        'record': '一键生成记录表格',
+        'rectification': '不合格项整改'
+    };
+    const typeName = typeMap[type] || type;
+    const input = document.getElementById('msgInput');
+    if (input) {
+        input.value = '请' + typeName + '。基于我填写的体系调研信息，生成完整的' + typeName + '。';
+        autoResize(input);
+        input.focus();
+    }
+    showToast('已填入"' + typeName + '"请求，点击发送按钮开始生成', 3000);
+}
+
+// ===== 生成按钮显示/隐藏逻辑 =====
+function updateGenButtonsVisibility() {
+    const genSection = document.getElementById('sidebarGenSection');
+    if (genSection) {
+        // 选中智能体后显示生成按钮
+        genSection.style.display = currentAgentId ? 'block' : 'none';
+    }
+}
+
 // ===== 帮助页面 =====
 function showHelpPage() {
     const helpPage = document.getElementById('helpPage');
