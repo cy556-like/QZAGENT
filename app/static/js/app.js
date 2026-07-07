@@ -3180,7 +3180,8 @@ async function loadExtKbDocs() {
     docList.innerHTML = '<div class="kb-doc-empty">加载中...</div>';
     
     try {
-        const resp = await fetch('/api/v1/external-kb/documents', {
+        const url = '/api/v1/external-kb/documents?category=' + encodeURIComponent(currentExtKbCategory || '');
+        const resp = await fetch(url, {
             headers: { 'Authorization': 'Bearer ' + authToken }
         });
         const data = await resp.json();
@@ -3192,13 +3193,21 @@ async function loadExtKbDocs() {
                 html += '<div class="kb-doc-item"><span class="kb-doc-name">' + escapeHtml(name) + '</span><button class="kb-doc-del-btn" onclick="deleteExtKbDoc(\'' + name + '\')">删除</button></div>';
             });
             docList.innerHTML = html;
-            // 更新统计
-            const statEl = document.getElementById('extKbStatDocCount');
-            if (statEl) statEl.textContent = data.documents.length;
         } else {
             docList.innerHTML = '<div class="kb-doc-empty">暂无文件，点击右上角上传</div>';
-            const statEl = document.getElementById('extKbStatDocCount');
-            if (statEl) statEl.textContent = '0';
+        }
+        
+        // 更新统计（文档数 + 切片数）
+        const statUrl = '/api/v1/external-kb/stats?category=' + encodeURIComponent(currentExtKbCategory || '');
+        const statResp = await fetch(statUrl, {
+            headers: { 'Authorization': 'Bearer ' + authToken }
+        });
+        const statData = await statResp.json();
+        if (statData.success) {
+            const docEl = document.getElementById('extKbStatDocCount');
+            const chunkEl = document.getElementById('extKbStatChunkCount');
+            if (docEl) docEl.textContent = statData.doc_count || 0;
+            if (chunkEl) chunkEl.textContent = statData.chunk_count || 0;
         }
     } catch (e) {
         docList.innerHTML = '<div class="kb-doc-empty">暂无文件，点击右上角上传</div>';
@@ -3233,6 +3242,7 @@ async function onExtKbFileSelected(event) {
     try {
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('category', currentExtKbCategory || '');
         
         const resp = await fetch('/api/v1/external-kb/upload', {
             method: 'POST',
@@ -3242,7 +3252,8 @@ async function onExtKbFileSelected(event) {
         const data = await resp.json();
         
         if (data.success) {
-            showToast('✓ 上传成功: ' + file.name, 3000);
+            const chunks = data.chunks || 0;
+            showToast('✓ 上传成功: ' + file.name + (chunks ? '（共 ' + chunks + ' 个分块）' : ''), 3000);
             loadExtKbDocs();
         } else {
             showToast('上传失败: ' + (data.detail || data.message || '未知错误'), 3000);
