@@ -3173,15 +3173,82 @@ function addExtKbSubCategory(parentGroup) {
     showToast('已添加：' + name.trim(), 2000);
 }
 
-function loadExtKbDocs() {
-    // 后续对接后端 API
+async function loadExtKbDocs() {
     const docList = document.getElementById('extKbDocList');
-    if (docList) docList.innerHTML = '<div class="kb-doc-empty">暂无文件，点击右上角上传</div>';
+    if (!docList) return;
+    docList.innerHTML = '<div class="kb-doc-empty">加载中...</div>';
+    
+    try {
+        const resp = await fetch('/api/v1/external-kb/documents', {
+            headers: { 'Authorization': 'Bearer ' + authToken }
+        });
+        const data = await resp.json();
+        
+        if (data.success && data.documents && data.documents.length > 0) {
+            let html = '';
+            data.documents.forEach(doc => {
+                const name = doc.filename || doc.name || doc;
+                html += '<div class="kb-doc-item"><span class="kb-doc-name">' + escapeHtml(name) + '</span><button class="kb-doc-del-btn" onclick="deleteExtKbDoc(\'' + name + '\')">删除</button></div>';
+            });
+            docList.innerHTML = html;
+            // 更新统计
+            const statEl = document.getElementById('extKbStatDocCount');
+            if (statEl) statEl.textContent = data.documents.length;
+        } else {
+            docList.innerHTML = '<div class="kb-doc-empty">暂无文件，点击右上角上传</div>';
+            const statEl = document.getElementById('extKbStatDocCount');
+            if (statEl) statEl.textContent = '0';
+        }
+    } catch (e) {
+        docList.innerHTML = '<div class="kb-doc-empty">暂无文件，点击右上角上传</div>';
+    }
 }
 
-function onExtKbFileSelected(event) {
-    // 后续对接上传 API
-    showToast('外部知识库上传功能开发中', 2000);
+async function deleteExtKbDoc(filename) {
+    if (!confirm('确认删除「' + filename + '」？')) return;
+    try {
+        const resp = await fetch('/api/v1/external-kb/documents/' + encodeURIComponent(filename), {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + authToken }
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showToast('已删除: ' + filename, 2000);
+            loadExtKbDocs();
+        } else {
+            showToast('删除失败', 2000);
+        }
+    } catch (e) {
+        showToast('删除失败: ' + e.message, 2000);
+    }
+}
+
+async function onExtKbFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    showToast('正在上传: ' + file.name, 2000);
+    
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const resp = await fetch('/api/v1/external-kb/upload', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + authToken },
+            body: formData
+        });
+        const data = await resp.json();
+        
+        if (data.success) {
+            showToast('✓ 上传成功: ' + file.name, 3000);
+            loadExtKbDocs();
+        } else {
+            showToast('上传失败: ' + (data.detail || data.message || '未知错误'), 3000);
+        }
+    } catch (e) {
+        showToast('上传失败: ' + e.message, 3000);
+    }
     event.target.value = '';
 }
 
