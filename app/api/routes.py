@@ -2948,15 +2948,17 @@ async def get_agents(authorization: str = Header(None)):
 # ===== 外部知识库上传 =====
 
 @router.post("/external-kb/upload", summary="上传文档到外部知识库")
-async def external_kb_upload(file: UploadFile = File(...), username: str = Depends(require_auth)):
-    """上传文档到外部知识库（external_kb collection）"""
+async def external_kb_upload(file: UploadFile = File(...), category: str = Form(""), username: str = Depends(require_auth)):
+    """上传文档到外部知识库（external_kb collection），按子分类存储"""
     allowed_ext = {".pdf", ".txt", ".md", ".docx", ".xlsx", ".xls", ".doc"}
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in allowed_ext:
         raise HTTPException(status_code=400, detail=f"不支持的格式: {ext}")
 
-    # 保存文件到外部知识库目录
+    # 保存文件到外部知识库目录（按子分类存子目录）
     ext_doc_dir = os.path.join(settings.DOCUMENTS_DIR, "external_kb")
+    if category:
+        ext_doc_dir = os.path.join(ext_doc_dir, category)
     os.makedirs(ext_doc_dir, exist_ok=True)
     decoded_filename = file.filename
     file_path = os.path.join(ext_doc_dir, decoded_filename)
@@ -2965,15 +2967,16 @@ async def external_kb_upload(file: UploadFile = File(...), username: str = Depen
     with open(file_path, "wb") as f:
         f.write(content_bytes)
 
-    logger.info(f"[外部知识库上传] 用户={username}, 文件={decoded_filename}")
+    logger.info(f"[外部知识库上传] 用户={username}, 文件={decoded_filename}, 分类={category}")
 
-    # 索引到 external_kb collection
+    # 索引到 external_kb collection（带 category 元数据）
     try:
-        index_result = await asyncio.to_thread(index_document, file_path, decoded_filename, agent_id="__external__")
+        index_result = await asyncio.to_thread(index_document, file_path, decoded_filename, agent_id="__external__", category=category or None)
         if index_result.get("status") == "error":
             raise HTTPException(status_code=500, detail=index_result.get("message", "索引失败"))
-        logger.info(f"[外部知识库] 索引成功: {decoded_filename}")
-        return {"success": True, "filename": decoded_filename, "message": "上传并索引成功"}
+        chunks = index_result.get("chunks", 0)
+        logger.info(f"[外部知识库] 索引成功: {decoded_filename}, 分块={chunks}")
+        return {"success": True, "filename": decoded_filename, "chunks": chunks, "message": "上传并索引成功"}
     except HTTPException:
         raise
     except Exception as e:
@@ -2982,13 +2985,40 @@ async def external_kb_upload(file: UploadFile = File(...), username: str = Depen
 
 
 @router.get("/external-kb/documents", summary="列出外部知识库文档")
-async def external_kb_documents(username: str = Depends(require_auth)):
-    """列出外部知识库的所有文档"""
+async def external_kb_documents(category: str = Query(None), username: str = Depends(require_auth)):
+    """列出外部知识库的所有文档（按子分类过滤）"""
     try:
-        docs = await asyncio.to_thread(list_indexed_documents, agent_id="__external__")
+        docs = await asyncio.to_thread(list_indexed_documents, agent_id="__external__", category=category)
         return {"success": True, "documents": docs}
     except Exception as e:
         return {"success": True, "documents": []}
+
+
+@router.get("/external-kb/stats", summary="外部知识库统计")
+async def external_kb_stats(category: str = Query(None), username: str = Depends(require_auth)):
+    """获取外部知识库的文档数和切片数"""
+    try:
+        docs = await asyncio.to_thread(list_indexed_documents, agent_id="__external__", category=category)
+        doc_count = len(docs)
+        # 从 ChromaDB 获取切片数
+        chunk_count = 0
+        try:
+            from app.rag.document import get_vector_store
+            vs = get_vector_store(agent_id="__external__")
+            if vs is not None:
+                collection = vs._collection
+                all_docs = collection.get(include=["metadatas"])
+                for meta in all_docs.get("metadatas", []):
+                    if category:
+                        if meta and meta.get("category") == category:
+                            chunk_count += 1
+                    else:
+                        chunk_count += 1
+        except Exception:
+            pass
+        return {"success": True, "doc_count": doc_count, "chunk_count": chunk_count}
+    except Exception as e:
+        return {"success": True, "doc_count": 0, "chunk_count": 0}
 
 
 @router.delete("/external-kb/documents/{filename}", summary="删除外部知识库文档")
