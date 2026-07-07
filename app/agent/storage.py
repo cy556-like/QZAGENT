@@ -30,22 +30,12 @@ def _user_file(username: str) -> str:
 # 允许的智能体ID白名单（顺序与前端 ALLOWED_AGENT_IDS 保持一致）
 # 顺序即侧边栏固定显示顺序：DFMEA排第一
 ALLOWED_AGENT_IDS = {
-    'dfmea-risk-agent',            # 1. 填写体系调研
-    'part-design-agent',           # 2. 一键生成手册
-    'simulation-optimization-agent', # 3. 一键生成程序文件
-    'material-selection-agent',     # 4. 一键生成三层次文件
-    'manufacturing-process-agent',  # 5. 一键生成记录表格
-    'ee-design-agent',             # 6. 不合格项整改
+    'dfmea-risk-agent',            # 唯一智能体：填写体系调研
 }
 
 # 固定排序顺序列表（与前端 ALLOWED_AGENT_IDS 数组顺序一致）
 AGENT_SORT_ORDER = [
     'dfmea-risk-agent',
-    'part-design-agent',
-    'simulation-optimization-agent',
-    'material-selection-agent',
-    'manufacturing-process-agent',
-    'ee-design-agent',
 ]
 
 
