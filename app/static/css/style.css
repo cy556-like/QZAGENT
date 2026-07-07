@@ -6059,32 +6059,14 @@ html { scroll-behavior: smooth; }
 
 
 .login-main-area {
-
-
     position: relative;
-
-
     z-index: 1;
-
-
     flex: 1;
-
-
     display: flex;
-
-
     align-items: center;
-
-
     justify-content: center;
-
-
-    gap: 80px;
-
-
-    padding: 0 60px;
-
-
+    gap: 40px;
+    padding: 0 40px;
 }
 
 
@@ -6173,23 +6155,13 @@ html { scroll-behavior: smooth; }
 
 
 .login-left-panel {
-
-
-    flex: 1;
-
-
+    flex: 0 0 auto;
     display: flex;
-
-
     align-items: center;
-
-
-    justify-content: center;
-
-
+    justify-content: flex-end;
+    width: 50%;
     max-width: 560px;
-
-
+    padding-right: 20px;
 }
 
 
@@ -6216,26 +6188,13 @@ html { scroll-behavior: smooth; }
 
 
 .login-right-panel {
-
-
     flex: 0 0 auto;
-
-
     display: flex;
-
-
     align-items: center;
-
-
-    justify-content: center;
-
-
-    margin-left: auto;
-
-
-    margin-right: 60px;
-
-
+    justify-content: flex-start;
+    width: 50%;
+    max-width: 460px;
+    padding-left: 20px;
 }
 
 
