@@ -3067,6 +3067,7 @@ function showSurveyForm() {
     if (helpPage) helpPage.style.display = 'none';
     if (externalKbPage) externalKbPage.style.display = 'none';
     if (chatContent) chatContent.style.display = 'none';
+    if (chatContent) chatContent.style.display = 'none';
     if (surveyPage) {
         surveyPage.style.display = 'block';
         loadSurveyData();
@@ -3295,8 +3296,10 @@ function showHelpPage() {
     const chatContent = document.getElementById('chatContent');
     const kbPage = document.getElementById('kbPage');
     const externalKbPage = document.getElementById('externalKbPage');
+    const surveyPage = document.getElementById('surveyPage');
     if (kbPage) kbPage.style.display = 'none';
     if (externalKbPage) externalKbPage.style.display = 'none';
+    if (surveyPage) surveyPage.style.display = 'none';
     if (chatContent) chatContent.style.display = 'none';
     if (helpPage) helpPage.style.display = '';
     // push history state，让浏览器后退按钮能返回聊天页
@@ -3319,8 +3322,10 @@ function showExternalKbPage() {
     const chatContent = document.getElementById('chatContent');
     const kbPage = document.getElementById('kbPage');
     const helpPage = document.getElementById('helpPage');
+    const surveyPage = document.getElementById('surveyPage');
     if (kbPage) kbPage.style.display = 'none';
     if (helpPage) helpPage.style.display = 'none';
+    if (surveyPage) surveyPage.style.display = 'none';
     if (chatContent) chatContent.style.display = 'none';
     if (externalKbPage) externalKbPage.style.display = '';
     // push history state
@@ -3344,6 +3349,12 @@ function showKbPage() {
     }
     const chatContent = document.getElementById('chatContent');
     const kbPage = document.getElementById('kbPage');
+    const surveyPage = document.getElementById('surveyPage');
+    const helpPage = document.getElementById('helpPage');
+    const externalKbPage = document.getElementById('externalKbPage');
+    if (surveyPage) surveyPage.style.display = 'none';
+    if (helpPage) helpPage.style.display = 'none';
+    if (externalKbPage) externalKbPage.style.display = 'none';
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     chatContent.style.display = 'none';
