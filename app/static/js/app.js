@@ -1619,17 +1619,8 @@ async function deleteChatItem(chatId) {
         // 如果当前模式没有会话了，不自动创建新对话
         const modeChats = getModeChats();
         if (modeChats.length === 0) {
-            // 检查是否已填写调研
-            const hasSurvey = localStorage.getItem('surveyData');
-            if (!hasSurvey) {
-                // 未填调研 → 显示填写表单
-                showSurveyForm();
-            } else {
-                // 已填调研 → 显示空白聊天界面
-                clearChatUI();
-                const welcomeEl = document.getElementById('welcomeCenter');
-                if (welcomeEl) welcomeEl.style.display = '';
-            }
+            // 没有会话了 → 直接显示体系调研填写页
+            showSurveyForm();
         }
     } catch (e) { console.error('删除会话失败', e); }
 }
