@@ -77,6 +77,9 @@ _EMBEDDINGS_TTL = 900  # 15分钟
 # 全局知识库的 collection 名称
 GLOBAL_COLLECTION_NAME = "langchain"
 
+# 外部知识库 collection 名称
+EXTERNAL_KB_COLLECTION_NAME = "external_kb"
+
 # Embedding 提供者配置：
 # 优先级：1. 智谱云端API（embedding-3）→ 2. 纯关键词索引
 # 云端不可用时直接降级为关键词模式（本地 HuggingFace 在国内网络下无法使用，已移除）
@@ -466,6 +469,8 @@ def _get_collection_name(agent_id: str = None) -> str:
     - agent_id 有值 → 智能体专属知识库
     """
     if agent_id:
+        if agent_id == "__external__":
+            return EXTERNAL_KB_COLLECTION_NAME
         # 用 agent_id 做 collection 名，确保合法
         safe_id = agent_id.replace('-', '_').replace(' ', '_')
         return f"agent_{safe_id}"
@@ -2089,6 +2094,48 @@ def _generate_multi_queries(query: str) -> list[str]:
     
     return list(dict.fromkeys(queries))  # 去重保序
 
+def _search_external_kb(query: str, top_k: int = 3) -> list[dict]:
+    """搜索外部知识库 collection，返回结果列表"""
+    global _embedding_available
+
+    if _embedding_available is False:
+        # 关键词模式
+        results = _search_keyword_index(query, top_k=top_k, agent_id="__external__")
+        if results:
+            logger.info(f"外部知识库(关键词)检索到 {len(results)} 条结果")
+        return results
+
+    # 向量模式
+    try:
+        vector_store = get_vector_store(agent_id="__external__")
+        if vector_store is None:
+            return []
+
+        # 用 _get_collection_name 逻辑获取正确的 collection 名
+        # __external__ → external_kb
+        raw = _safe_similarity_search_with_score(vector_store, query, k=top_k)
+        results = []
+        seen = set()
+        for doc, score in raw:
+            content_key = doc.page_content[:100]
+            if content_key in seen:
+                continue
+            seen.add(content_key)
+            source = doc.metadata.get('source', '外部知识库')
+            filename = os.path.basename(source) if source else '未知'
+            results.append({
+                'content': doc.page_content,
+                'source': filename,
+                'score': float(score),
+                'metadata': doc.metadata,
+            })
+        logger.info(f"外部知识库(向量)检索到 {len(results)} 条结果")
+        return results
+    except Exception as e:
+        logger.warning(f"外部知识库检索失败: {e}")
+        return []
+
+
 def search_documents(query: str, top_k: int = 3, agent_id: str = None) -> list[dict]:
     """
     [#9] 混合检索：向量语义检索 + BM25关键词检索 + RRF融合
@@ -2111,6 +2158,9 @@ def search_documents(query: str, top_k: int = 3, agent_id: str = None) -> list[d
         logger.info(f"普通聊天模式无知识库，跳过检索: query='{query[:50]}...'")
         return []
 
+    # ===== 同时搜索外部知识库 =====
+    external_results = _search_external_kb(query, top_k=top_k)
+
     # ===== [#11] 根据索引模式选择检索策略 =====
 
     if _embedding_available is False:
@@ -2120,6 +2170,10 @@ def search_documents(query: str, top_k: int = 3, agent_id: str = None) -> list[d
         if not results:
             # 关键词索引无结果，尝试从磁盘文件全文搜索
             results = _search_disk_files(query, top_k=top_k, agent_id=agent_id)
+        # 合并外部知识库结果
+        if external_results:
+            results = results + external_results[:top_k]
+            logger.info(f"外部知识库补充 {min(len(external_results), top_k)} 条结果")
         return results
 
     # ===== [#13] 多查询检索：生成查询变体，提升短段落召回率 =====
@@ -2183,6 +2237,10 @@ def search_documents(query: str, top_k: int = 3, agent_id: str = None) -> list[d
         results = _search_keyword_index(query, top_k=top_k, agent_id=agent_id)
         if not results:
             results = _search_disk_files(query, top_k=top_k, agent_id=agent_id)
+        # 合并外部知识库结果
+        if external_results:
+            results = results + external_results[:top_k]
+            logger.info(f"外部知识库补充 {min(len(external_results), top_k)} 条结果")
         return results
 
     # 2. BM25 关键词检索 - 对每个查询变体都检索，合并去重
@@ -2244,6 +2302,9 @@ async def search_documents_async(query: str, top_k: int = 3, agent_id: str = Non
     if not agent_id:
         logger.info(f"普通聊天模式无知识库，跳过检索: query='{query[:50]}...'")
         return []
+
+    # ===== 同时搜索外部知识库 =====
+    external_results = _search_external_kb(query, top_k=top_k)
 
     # ===== [#11] 根据索引模式选择检索策略 =====
     if _embedding_available is False:
