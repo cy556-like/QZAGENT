@@ -2931,15 +2931,17 @@ def delete_document(filename: str, agent_id: str = None) -> dict:
     if vector_store is not None:
         try:
             collection = vector_store._collection
-            results = collection.get(
-                where={"source_file": filename},
-                include=["metadatas"],
-            )
-            chunk_ids = results.get("ids", [])
+            # 获取所有文档，按文件名匹配
+            all_docs = collection.get(include=["metadatas"])
+            chunk_ids = []
+            for i, meta in enumerate(all_docs.get("metadatas", [])):
+                if meta and meta.get("source_file") == filename:
+                    chunk_ids.append(all_docs["ids"][i])
             if chunk_ids:
                 found_in_any = True
                 collection.delete(ids=chunk_ids)
                 chunks_deleted = len(chunk_ids)
+                logger.info(f"已从 ChromaDB 删除 {chunks_deleted} 个分块: {filename}")
         except Exception as e:
             logger.warning(f"从 ChromaDB 删除失败: {e}")
 
@@ -2954,13 +2956,23 @@ def delete_document(filename: str, agent_id: str = None) -> dict:
     if cache_key in _bm25_doc_cache:
         del _bm25_doc_cache[cache_key]
 
-    # 3. 删除原始文件（查找可能的位置）
+    # 3. 删除原始文件（查找可能的位置，包括分类子目录）
     file_deleted = False
     possible_paths = []
 
     if agent_id:
-        possible_paths.append(os.path.join(settings.DOCUMENTS_DIR, f"agent_{agent_id}", filename))
+        agent_dir = os.path.join(settings.DOCUMENTS_DIR, f"agent_{agent_id}")
+        possible_paths.append(os.path.join(agent_dir, filename))
+        # 搜索分类子目录
+        if os.path.exists(agent_dir) and os.path.isdir(agent_dir):
+            for item in os.listdir(agent_dir):
+                item_path = os.path.join(agent_dir, item)
+                if os.path.isdir(item_path):
+                    possible_paths.append(os.path.join(item_path, filename))
     possible_paths.append(os.path.join(settings.DOCUMENTS_DIR, filename))
+    # 外部知识库
+    if agent_id == "__external__":
+        possible_paths.append(os.path.join(settings.DOCUMENTS_DIR, "external_kb", filename))
 
     for file_path in possible_paths:
         if os.path.exists(file_path):
