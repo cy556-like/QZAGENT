@@ -305,128 +305,59 @@
 
 
         <div class="kb-page" id="kbPage" style="display:none;">
-
-
             <div class="kb-page-header">
-
-
                 <button class="kb-back-btn" onclick="hideKbPage()" title="返回对话" aria-label="返回对话">← 返回对话</button>
-
-
                 <div class="kb-page-title-area">
-
-
-                    <h2 id="kbPageTitle">知识库管理</h2>
-
-
-                    <p id="kbPageDesc" class="kb-page-desc">上传和管理智能体相关文档，系统将自动进行向量化处理</p>
-
-
+                    <h2 id="kbPageTitle">企业内部体系文件</h2>
+                    <p id="kbPageDesc" class="kb-page-desc">管理企业体系文件，按分类查看和上传文档</p>
                 </div>
-
-
             </div>
-
-
-            <div class="kb-page-body">
-
-
+            <div class="kb-page-body kb-page-body-new">
+                <div class="kb-layout">
+                    <!-- 左列：分类 -->
+                    <div class="kb-cat-col">
+                        <div class="kb-cat-header">
+                            <span>📁 文件分类</span>
+                            <button class="kb-cat-add-btn" onclick="addKbCategory()" title="新建分类">＋</button>
+                        </div>
+                        <div class="kb-cat-list" id="kbCatList">
+                            <button class="kb-cat-item active" onclick="selectKbCategory('手册', this)">📄 手册</button>
+                            <button class="kb-cat-item" onclick="selectKbCategory('程序文件', this)">📋 程序文件</button>
+                            <button class="kb-cat-item" onclick="selectKbCategory('三层次文件', this)">📝 三层次文件</button>
+                            <button class="kb-cat-item" onclick="selectKbCategory('记录表格', this)">📊 记录表格</button>
+                            <button class="kb-cat-item" onclick="selectKbCategory('其他', this)">📂 其他</button>
+                        </div>
+                    </div>
+                    <!-- 右列：文件列表 -->
+                    <div class="kb-file-col">
+                        <div class="kb-file-header">
+                            <span class="kb-file-title" id="kbFileTitle">手册</span>
+                            <button class="kb-file-upload-btn" onclick="document.getElementById('kbPageFileInput').click()">📤 上传文件</button>
+                        </div>
+                        <div class="kb-file-list" id="kbPageDocList">
+                            <div class="kb-doc-empty">暂无文件，点击右上角上传</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 统计信息 -->
                 <div class="kb-stats-row" id="kbStatsRow">
-
-
                     <div class="kb-stat-card">
-
-
                         <div class="kb-stat-number" id="kbStatDocCount">0</div>
-
-
                         <div class="kb-stat-label">文档总数</div>
-
-
                     </div>
-
-
                     <div class="kb-stat-card">
-
-
                         <div class="kb-stat-number" id="kbStatChunkCount">0</div>
-
-
                         <div class="kb-stat-label">文本片段</div>
-
-
                     </div>
-
-
                 </div>
-
-
-                <div class="kb-upload-zone" id="kbPageUploadZone" onclick="document.getElementById('kbPageFileInput').click()" role="button" aria-label="上传文档">
-
-
-                    <div class="kb-upload-icon">
-
-
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-
-
-                    </div>
-
-
-                    <div class="kb-upload-text">拖拽文件到此处，或<span class="kb-upload-link">点击上传</span></div>
-
-
-                    <div class="kb-upload-hint">支持 PDF、Word、Excel、TXT、图片(PNG/JPG等) 格式</div>
-
-
-                    <div class="kb-upload-warn">上传文件后需等待1分钟以上，后台处理完成后即可使用</div>
-
-
-                </div>
-
-
                 <input type="file" id="kbPageFileInput" accept=".pdf,.txt,.docx,.xlsx,.xls,.doc,.png,.jpg,.jpeg,.gif,.bmp,.webp" onchange="onKbPageFileSelected(event)" style="display:none">
-
-
                 <div class="kb-upload-progress" id="kbPageProgress" style="display:none;">
-
-
                     <div class="kb-progress-file" id="kbProgressFileName">正在上传...</div>
-
-
                     <div class="kb-progress-bar-bg"><div class="kb-progress-bar-fill" id="kbProgressBarFill"></div></div>
-
-
                     <div class="kb-progress-status" id="kbProgressStatus">上传中...</div>
-
-
                 </div>
-
-
-                <div class="kb-doc-section">
-
-
-                    <div class="kb-doc-section-title">已上传文档</div>
-
-
-                    <div class="kb-doc-list" id="kbPageDocList">
-
-
-                        <div class="kb-doc-empty">加载中...</div>
-
-
-                    </div>
-
-
-                </div>
-
-
             </div>
-
-
         </div>
-
-
         <div class="survey-page" id="surveyPage" style="display:none;">
             <div class="survey-header">
                 <h2>📋 体系调研表</h2>
