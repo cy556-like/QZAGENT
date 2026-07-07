@@ -584,7 +584,12 @@ function toggleMyAgents() {
 // ===== Agent KB Upload Toggle & Header KB Button Visibility =====
 function updateHeaderKbVisibility() {
     const btn = document.getElementById('headerKbBtn');
+    const externalKbBtn = document.getElementById('headerExternalKbBtn');
+    const helpBtn = document.getElementById('headerHelpBtn');
     const skillsWrapper = document.getElementById('skillsWrapper');
+    // 帮助按钮和外部知识库按钮始终显示
+    if (helpBtn) helpBtn.style.display = 'inline-flex';
+    if (externalKbBtn) externalKbBtn.style.display = 'inline-flex';
     if (!btn) return;
     // 只在选中了某个智能体时才显示 header 知识库按钮和 Skills 按钮
     if (currentAgentId) {
@@ -2876,6 +2881,44 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ===== Knowledge Base Full Page =====
+// ===== 帮助页面 =====
+function showHelpPage() {
+    const helpPage = document.getElementById('helpPage');
+    const chatContent = document.getElementById('chatContent');
+    const kbPage = document.getElementById('kbPage');
+    const externalKbPage = document.getElementById('externalKbPage');
+    if (kbPage) kbPage.style.display = 'none';
+    if (externalKbPage) externalKbPage.style.display = 'none';
+    if (chatContent) chatContent.style.display = 'none';
+    if (helpPage) helpPage.style.display = '';
+}
+
+function hideHelpPage() {
+    const helpPage = document.getElementById('helpPage');
+    const chatContent = document.getElementById('chatContent');
+    if (helpPage) helpPage.style.display = 'none';
+    if (chatContent) chatContent.style.display = '';
+}
+
+// ===== 外部知识库页面 =====
+function showExternalKbPage() {
+    const externalKbPage = document.getElementById('externalKbPage');
+    const chatContent = document.getElementById('chatContent');
+    const kbPage = document.getElementById('kbPage');
+    const helpPage = document.getElementById('helpPage');
+    if (kbPage) kbPage.style.display = 'none';
+    if (helpPage) helpPage.style.display = 'none';
+    if (chatContent) chatContent.style.display = 'none';
+    if (externalKbPage) externalKbPage.style.display = '';
+}
+
+function hideExternalKbPage() {
+    const externalKbPage = document.getElementById('externalKbPage');
+    const chatContent = document.getElementById('chatContent');
+    if (externalKbPage) externalKbPage.style.display = 'none';
+    if (chatContent) chatContent.style.display = '';
+}
+
 function showKbPage() {
     if (!currentAgentId) {
         showToast('请先选择一个智能体');
