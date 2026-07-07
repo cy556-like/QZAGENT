@@ -1112,6 +1112,7 @@ window.addEventListener('popstate', function(e) {
                 if (externalKbPage) externalKbPage.style.display = 'none';
                 if (kbPage) kbPage.style.display = 'none';
                 if (chatContent) chatContent.style.display = 'none';
+                if (sidebar) sidebar.style.display = '';
             }
         } else {
             history.replaceState({page: 'login'}, '');
