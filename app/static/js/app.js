@@ -3399,15 +3399,22 @@ function generateDocument(type) {
         showSurveyForm();
         return;
     }
+    // 检查是否在聊天界面（不在的话先切回去）
+    const surveyPage = document.getElementById('surveyPage');
+    if (surveyPage && surveyPage.style.display !== 'none') {
+        hideSurveyForm();
+    }
+    // 构造消息内容（含调研数据）
+    const surveyText = formatSurveyDataForAI();
+    const message = '请' + typeName + '。\n\n' + surveyText + '\n\n基于以上体系调研信息，生成完整的' + typeName + '。';
+    // 直接填入输入框并自动发送（不等用户点发送）
     const input = document.getElementById('msgInput');
     if (input) {
-        // 把调研数据格式化后加入消息
-        const surveyText = formatSurveyDataForAI();
-        input.value = '请' + typeName + '。\n\n' + surveyText + '\n\n基于以上体系调研信息，生成完整的' + typeName + '。';
+        input.value = message;
         autoResize(input);
-        input.focus();
     }
-    showToast('已填入"' + typeName + '"请求（含调研数据），点击发送按钮开始生成', 3000);
+    // 自动发送
+    sendMessage();
 }
 
 // ===== 生成按钮显示/隐藏逻辑 =====
