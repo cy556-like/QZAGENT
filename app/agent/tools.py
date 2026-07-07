@@ -520,16 +520,33 @@ def list_documents_tool() -> str:
         return "【文档列表】当前是普通聊天模式，没有关联的知识库。如需管理文档，请先选择一个智能体。"
 
     docs = list_indexed_documents(agent_id=current_aid)
+    # 同时列出外部知识库的文档
+    ext_docs = list_indexed_documents(agent_id="__external__")
 
-    if not docs:
-        return f"【文档列表】知识库中暂无文档（当前搜索的知识库: agent_id={current_aid}）。请先通过上传功能添加文档。"
+    if not docs and not ext_docs:
+        return f"【文档列表】两个知识库均暂无文档（内部: agent_id={current_aid}，外部: external_kb）。请先上传文档。"
 
-    output = f"【文档列表】知识库中共有 {len(docs)} 个文档：\n\n"
-    for i, doc in enumerate(docs, 1):
-        ext = doc.rsplit('.', 1)[-1].lower() if '.' in doc else ''
-        type_label = {'pdf': 'PDF文档', 'docx': 'Word文档', 'txt': '文本文件'}.get(ext, '文档')
-        output += f"  {i}. {doc}（{type_label}）\n"
+    output = "【文档列表】当前可访问 2 个知识库：\n\n"
+    
+    output += f"一、企业内部体系文件（{len(docs)} 个文档）：\n"
+    if docs:
+        for i, doc in enumerate(docs, 1):
+            ext = doc.rsplit('.', 1)[-1].lower() if '.' in doc else ''
+            type_label = {'pdf': 'PDF文档', 'docx': 'Word文档', 'txt': '文本文件'}.get(ext, '文档')
+            output += f"  {i}. {doc}（{type_label}）\n"
+    else:
+        output += "  （暂无文档）\n"
+    
+    output += f"\n二、外部知识库（{len(ext_docs)} 个文档）：\n"
+    if ext_docs:
+        for i, doc in enumerate(ext_docs, 1):
+            ext = doc.rsplit('.', 1)[-1].lower() if '.' in doc else ''
+            type_label = {'pdf': 'PDF文档', 'docx': 'Word文档', 'txt': '文本文件'}.get(ext, '文档')
+            output += f"  {i}. {doc}（{type_label}）\n"
+    else:
+        output += "  （暂无文档）\n"
 
+    output += f"\n搜索时会同时检索两个知识库的内容。"
     return output
 
 
