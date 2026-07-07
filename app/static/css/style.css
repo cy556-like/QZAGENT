@@ -12831,6 +12831,20 @@ html { scroll-behavior: smooth; }
 .survey-draft-btn:hover {
     background: #f0f7ff;
 }
+.survey-clear-btn {
+    padding: 14px 24px;
+    background: #fff;
+    color: #e63946;
+    border: 1.5px solid #e63946;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+.survey-clear-btn:hover {
+    background: #fef0f0;
+}
 @media (max-width: 768px) {
     .survey-body { padding: 16px; }
     .survey-row { flex-direction: column; gap: 0; }
