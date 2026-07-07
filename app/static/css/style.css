@@ -12926,3 +12926,126 @@ html { scroll-behavior: smooth; }
     border-radius: 4px;
     font-size: 12px;
 }
+
+
+/* ===== 知识库双列布局 ===== */
+.kb-page-body-new {
+    max-width: 1200px;
+}
+.kb-layout {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    min-height: 400px;
+}
+.kb-cat-col {
+    flex: 0 0 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.kb-cat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    padding: 8px 4px;
+}
+.kb-cat-add-btn {
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid #15589B;
+    background: #fff;
+    color: #15589B;
+    border-radius: 6px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.kb-cat-add-btn:hover {
+    background: #15589B;
+    color: #fff;
+}
+.kb-cat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.kb-cat-item {
+    padding: 12px 16px;
+    background: #fff;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+.kb-cat-item:hover {
+    border-color: #15589B;
+    background: #f0f7ff;
+}
+.kb-cat-item.active {
+    background: #15589B;
+    color: #fff;
+    border-color: #15589B;
+}
+.kb-cat-item .cat-del {
+    float: right;
+    color: #e63946;
+    font-size: 16px;
+    margin-left: 8px;
+}
+.kb-file-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e8e8e8;
+    overflow: hidden;
+}
+.kb-file-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid #e8e8e8;
+    background: #fafafa;
+}
+.kb-file-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+}
+.kb-file-upload-btn {
+    padding: 8px 16px;
+    background: #15589B;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.kb-file-upload-btn:hover {
+    background: #0F467A;
+}
+.kb-file-list {
+    flex: 1;
+    padding: 12px 20px;
+    overflow-y: auto;
+    max-height: 500px;
+}
+@media (max-width: 768px) {
+    .kb-layout { flex-direction: column; }
+    .kb-cat-col { flex: none; }
+}
