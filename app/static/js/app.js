@@ -3379,7 +3379,7 @@ function addKbCategory() {
     if (catList) {
         const btn = document.createElement('button');
         btn.className = 'kb-cat-item';
-        btn.innerHTML = '📂 ' + escapeHtml(name) + ' <span class="cat-del" onclick="delKbCategory(\'' + name + '\', event)">×</span>';
+        btn.innerHTML = '  ' + escapeHtml(name) + ' <span class="cat-del" onclick="delKbCategory(\'' + name + '\', event)">×</span>';
         btn.onclick = function() { selectKbCategory(name, this); };
         catList.appendChild(btn);
     }
