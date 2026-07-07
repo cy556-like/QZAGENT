@@ -399,9 +399,19 @@ async function switchToAgent(agentId) {
     modeChatId['agent'] = null;
     clearChatUI();
     renderChatList();
-    // 确保欢迎页可见
+    // 确保欢迎页可见（但如果没有调研数据，提示用户先填写）
     const welcomeEl = document.getElementById('welcomeCenter');
-    if (welcomeEl) welcomeEl.style.display = '';
+    if (welcomeEl) {
+        const hasSurvey = localStorage.getItem('surveyData');
+        if (hasSurvey) {
+            // 已填写调研 → 显示正常欢迎页
+            welcomeEl.style.display = '';
+        } else {
+            // 未填写调研 → 显示提示
+            welcomeEl.style.display = '';
+            welcomeEl.innerHTML = '<h2>体系智能体</h2><p>请先点击左侧"填写体系调研"填写企业信息</p><div class="quick-actions"></div>';
+        }
+    }
     const chatContent = document.getElementById('chatContent');
     if (chatContent) chatContent.classList.add('centered');
 }
@@ -1034,6 +1044,12 @@ async function doLogin() {
                 // [#14] 默认选中第一个智能体，避免进入空白的agent模式
                 if (!currentAgentId && myAgents.length > 0) {
                     await switchToAgent(myAgents[0].id);
+                }
+                // 检查是否已填写体系调研信息
+                const surveyData = localStorage.getItem('surveyData');
+                if (!surveyData) {
+                    // 未填写体系调研 → 显示填写表单（不显示聊天框）
+                    setTimeout(() => showSurveyForm(), 100);
                 }
             }, 500);
         } else { msgEl.className = 'msg-box error'; msgEl.textContent = data.message || '登录失败'; }
