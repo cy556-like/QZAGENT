@@ -3063,6 +3063,67 @@ function fillSurveyForm(fields) {
     return filled;
 }
 
+
+// ===== 外部知识库分类管理 =====
+let currentExtKbCategory = '体系文件-手册';
+
+function toggleExtCatGroup(btnEl) {
+    const group = btnEl.closest('.kb-cat-group');
+    if (group) group.classList.toggle('collapsed');
+}
+
+function selectExtKbCategory(cat, btnEl) {
+    currentExtKbCategory = cat;
+    document.querySelectorAll('#extKbCatList .kb-cat-item').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    const titleEl = document.getElementById('extKbFileTitle');
+    if (titleEl) titleEl.textContent = cat.split('-').pop();
+    loadExtKbDocs();
+}
+
+function addExtKbSubCategory(parentGroup) {
+    const name = prompt('请输入新分类名称：');
+    if (!name || !name.trim()) return;
+    const subListId = parentGroup === '按产品分类' ? 'extKbProductList' :
+                      parentGroup === '按工艺分类' ? 'extKbProcessList' : null;
+    if (subListId) {
+        const subList = document.getElementById(subListId);
+        if (subList) {
+            const btn = document.createElement('button');
+            btn.className = 'kb-cat-item';
+            btn.textContent = name.trim();
+            btn.onclick = function() { selectExtKbCategory(parentGroup + '-' + name.trim(), this); };
+            subList.appendChild(btn);
+        }
+    } else {
+        // 其他分类：在最后一个 group 的 sub-list 里添加
+        const groups = document.querySelectorAll('#extKbCatList .kb-cat-group');
+        if (groups.length >= 4) {
+            const subList = groups[3].querySelector('.kb-cat-sub-list');
+            if (subList) {
+                const btn = document.createElement('button');
+                btn.className = 'kb-cat-item';
+                btn.textContent = name.trim();
+                btn.onclick = function() { selectExtKbCategory('其他-' + name.trim(), this); };
+                subList.appendChild(btn);
+            }
+        }
+    }
+    showToast('已添加：' + name.trim(), 2000);
+}
+
+function loadExtKbDocs() {
+    // 后续对接后端 API
+    const docList = document.getElementById('extKbDocList');
+    if (docList) docList.innerHTML = '<div class="kb-doc-empty">暂无文件，点击右上角上传</div>';
+}
+
+function onExtKbFileSelected(event) {
+    // 后续对接上传 API
+    showToast('外部知识库上传功能开发中', 2000);
+    event.target.value = '';
+}
+
 // ===== 体系调研表单 =====
 function showSurveyForm() {
     const surveyPage = document.getElementById('surveyPage');
