@@ -1113,8 +1113,32 @@ window.addEventListener('popstate', function(e) {
     const loginModal = document.getElementById('loginModal');
     const chatPage = document.getElementById('chatPage');
     const kbPage = document.getElementById('kbPage');
+    const helpPage = document.getElementById('helpPage');
+    const externalKbPage = document.getElementById('externalKbPage');
     const chatContent = document.getElementById('chatContent');
     const sidebar = document.getElementById('sidebar');
+
+    // 处理帮助页面和外部知识库页面的后退
+    if (e.state && (e.state.page === 'help' || e.state.page === 'external_kb')) {
+        // 前进到帮助/外部知识库页面（用户按了前进按钮）
+        if (currentUser && authToken) {
+            loginModal.classList.remove('show');
+            chatPage.style.display = 'flex';
+            document.body.classList.add('body-chat-mode');
+            if (chatContent) chatContent.style.display = 'none';
+            if (kbPage) kbPage.style.display = 'none';
+            if (e.state.page === 'help') {
+                if (helpPage) helpPage.style.display = '';
+                if (externalKbPage) externalKbPage.style.display = 'none';
+            } else {
+                if (externalKbPage) externalKbPage.style.display = '';
+                if (helpPage) helpPage.style.display = 'none';
+            }
+        } else {
+            history.replaceState({page: 'login'}, '');
+        }
+        return;
+    }
 
     if (e.state && e.state.page === 'chat') {
         // 回到聊天页 - 从知识库页返回 或 从登录页前进
@@ -1136,8 +1160,10 @@ window.addEventListener('popstate', function(e) {
             loginModal.classList.remove('show');
             chatPage.style.display = 'flex';
             document.body.classList.add('body-chat-mode');
-            // [BUG FIX] 如果从知识库返回，关闭知识库页，恢复聊天页
+            // [BUG FIX] 如果从知识库/帮助/外部知识库返回，关闭对应页面，恢复聊天页
             if (kbPage) kbPage.style.display = 'none';
+            if (helpPage) helpPage.style.display = 'none';
+            if (externalKbPage) externalKbPage.style.display = 'none';
             if (chatContent) chatContent.style.display = 'flex';
             if (sidebar) sidebar.style.display = '';
         } else {
@@ -2891,6 +2917,8 @@ function showHelpPage() {
     if (externalKbPage) externalKbPage.style.display = 'none';
     if (chatContent) chatContent.style.display = 'none';
     if (helpPage) helpPage.style.display = '';
+    // push history state，让浏览器后退按钮能返回聊天页
+    history.pushState({page: 'help'}, '');
 }
 
 function hideHelpPage() {
@@ -2898,6 +2926,9 @@ function hideHelpPage() {
     const chatContent = document.getElementById('chatContent');
     if (helpPage) helpPage.style.display = 'none';
     if (chatContent) chatContent.style.display = '';
+    // 触发浏览器后退
+    window._navigatingFromHelp = true;
+    history.back();
 }
 
 // ===== 外部知识库页面 =====
@@ -2910,6 +2941,8 @@ function showExternalKbPage() {
     if (helpPage) helpPage.style.display = 'none';
     if (chatContent) chatContent.style.display = 'none';
     if (externalKbPage) externalKbPage.style.display = '';
+    // push history state
+    history.pushState({page: 'external_kb'}, '');
 }
 
 function hideExternalKbPage() {
@@ -2917,6 +2950,9 @@ function hideExternalKbPage() {
     const chatContent = document.getElementById('chatContent');
     if (externalKbPage) externalKbPage.style.display = 'none';
     if (chatContent) chatContent.style.display = '';
+    // 触发浏览器后退
+    window._navigatingFromExternalKb = true;
+    history.back();
 }
 
 function showKbPage() {
