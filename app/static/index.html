@@ -573,6 +573,19 @@
                     </div>
                 </div>
 
+                <!-- 上传相关手册 -->
+                <div class="survey-section survey-upload-section">
+                    <h3 class="survey-section-title">📎 上传相关手册（选填）</h3>
+                    <p class="survey-upload-hint">上传质量手册、体系文件等文档，AI 将自动识别并填充表单中对应的信息</p>
+                    <div class="survey-upload-zone" id="surveyUploadZone" onclick="document.getElementById('surveyFileInput').click()">
+                        <div class="survey-upload-icon">📤</div>
+                        <div class="survey-upload-text">点击上传文件</div>
+                        <div class="survey-upload-formats">支持 PDF、DOCX、DOC、TXT 格式</div>
+                    </div>
+                    <input type="file" id="surveyFileInput" accept=".pdf,.docx,.doc,.txt" style="display:none;" onchange="onSurveyFileSelected(event)">
+                    <div class="survey-upload-status" id="surveyUploadStatus" style="display:none;"></div>
+                </div>
+
                 <!-- 提交按钮 -->
                 <div class="survey-submit-area">
                     <button class="survey-submit-btn" onclick="saveSurveyData()">✓ 填写完毕</button>
