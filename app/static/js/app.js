@@ -2886,6 +2886,176 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ===== Knowledge Base Full Page =====
+// ===== 体系调研上传处理 =====
+async function onSurveyFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const statusEl = document.getElementById('surveyUploadStatus');
+    const uploadZone = document.getElementById('surveyUploadZone');
+
+    // 显示处理中
+    statusEl.className = 'survey-upload-status processing';
+    statusEl.innerHTML = '⏳ 正在分析文档并提取信息，请稍候...';
+    statusEl.style.display = 'block';
+
+    try {
+        // 1. 上传文件到服务器
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const uploadResp = await fetch('/api/v1/survey/upload', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + authToken },
+            body: formData
+        });
+        const uploadData = await uploadResp.json();
+
+        if (!uploadData.success) {
+            throw new Error(uploadData.message || '上传失败');
+        }
+
+        // 2. 调用 AI 提取信息
+        statusEl.innerHTML = '🤖 AI 正在识别文档中的企业信息...';
+
+        const extractResp = await fetch('/api/v1/survey/extract', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            },
+            body: JSON.stringify({
+                file_path: uploadData.file_path,
+                filename: file.name
+            })
+        });
+        const extractData = await extractResp.json();
+
+        if (extractData.success && extractData.fields) {
+            // 3. 自动填充表单
+            const filledFields = fillSurveyForm(extractData.fields);
+
+            // 4. 显示成功提示
+            statusEl.className = 'survey-upload-status success';
+            const fieldTags = filledFields.map(f => '<span class="field-updated">' + f + '</span>').join('');
+            statusEl.innerHTML = '✓ 已从文档中识别并填充 ' + filledFields.length + ' 个字段：' + fieldTags + '<br><span style="font-size:12px;opacity:0.8;">请检查并补充未识别的字段</span>';
+        } else {
+            throw new Error(extractData.message || 'AI 提取失败');
+        }
+    } catch (error) {
+        console.error('[调研上传] 错误:', error);
+        statusEl.className = 'survey-upload-status error';
+        statusEl.innerHTML = '❌ ' + error.message + '<br><span style="font-size:12px;">请手动填写表单</span>';
+    }
+
+    // 清空 input，允许重复上传
+    event.target.value = '';
+}
+
+function fillSurveyForm(fields) {
+    const filled = [];
+    const fieldMap = {
+        // 基本信息映射
+        'company_name': 'sv_company_name',
+        'cert_other': 'sv_cert_other',
+        'chairman': 'sv_chairman',
+        'legal_rep': 'sv_legal_rep',
+        'gm': 'sv_gm',
+        'deputy_gm': 'sv_deputy_gm',
+        'mgmt_rep': 'sv_mgmt_rep',
+        'leader_group_leader': 'sv_leader_group_leader',
+        'leader_group_members': 'sv_leader_group_members',
+        'iso_office_head': 'sv_iso_office_head',
+        'iso_office_members': 'sv_iso_office_members',
+        'auditors': 'sv_auditors',
+        'products': 'sv_products',
+        'process_flow': 'sv_process_flow',
+        'location': 'sv_location',
+        'area': 'sv_area',
+        'building_area': 'sv_building_area',
+        'staff_total': 'sv_staff_total',
+        'staff_mgmt': 'sv_staff_mgmt',
+        'staff_edu': 'sv_staff_edu',
+        'equipment': 'sv_equipment',
+        'customers': 'sv_customers',
+        'address': 'sv_address',
+        'contact': 'sv_contact',
+        'phone': 'sv_phone',
+        'fax': 'sv_fax',
+        'mobile': 'sv_mobile',
+        'purpose': 'sv_purpose',
+        'quality_policy': 'sv_quality_policy',
+        'quality_goal': 'sv_quality_goal',
+        'cert_date': 'sv_cert_date',
+        'audit_date': 'sv_audit_date',
+        'rest_day': 'sv_rest_day',
+        'design_dev': 'sv_design_dev',
+        'filler_name': 'sv_filler_name',
+        'filler_phone': 'sv_filler_phone',
+    };
+
+    const fieldLabels = {
+        'company_name': '公司名称',
+        'chairman': '董事长',
+        'legal_rep': '法人代表',
+        'gm': '总经理',
+        'deputy_gm': '副总经理',
+        'mgmt_rep': '管理者代表',
+        'products': '体系覆盖产品',
+        'process_flow': '生产流程',
+        'location': '地理位置',
+        'address': '公司地址',
+        'contact': '联系人',
+        'mobile': '手机',
+        'purpose': '公司宗旨',
+        'quality_policy': '质量方针',
+        'quality_goal': '质量目标',
+        'filler_name': '填写人',
+    };
+
+    // 填充文本字段
+    Object.keys(fields).forEach(key => {
+        const inputId = fieldMap[key];
+        if (inputId && fields[key]) {
+            const el = document.getElementById(inputId);
+            if (el && !el.value) {
+                // 只填充空字段，不覆盖已有内容
+                el.value = fields[key];
+                const label = fieldLabels[key] || key;
+                if (!filled.includes(label)) filled.push(label);
+            } else if (el && el.value) {
+                // 已有值也更新（AI 数据可能更准确）
+                el.value = fields[key];
+                const label = fieldLabels[key] || key;
+                if (!filled.includes(label)) filled.push(label);
+            }
+        }
+    });
+
+    // 填充证书复选框
+    if (fields.certs && Array.isArray(fields.certs)) {
+        document.querySelectorAll('.sv_cert').forEach(cb => {
+            if (fields.certs.includes(cb.value)) {
+                cb.checked = true;
+                if (!filled.includes('认证证书')) filled.push('认证证书');
+            }
+        });
+    }
+
+    // 填充机构设置
+    if (fields.org && typeof fields.org === 'object') {
+        Object.keys(fields.org).forEach(funcKey => {
+            const deptInput = document.querySelector('#sv_org_table input[data-field="' + funcKey + '_dept"]');
+            const headInput = document.querySelector('#sv_org_table input[data-field="' + funcKey + '_head"]');
+            if (deptInput && fields.org[funcKey].dept) deptInput.value = fields.org[funcKey].dept;
+            if (headInput && fields.org[funcKey].head) headInput.value = fields.org[funcKey].head;
+        });
+        if (!filled.includes('机构设置')) filled.push('机构设置');
+    }
+
+    return filled;
+}
+
 // ===== 体系调研表单 =====
 function showSurveyForm() {
     const surveyPage = document.getElementById('surveyPage');
