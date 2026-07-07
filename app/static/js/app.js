@@ -3349,6 +3349,60 @@ function hideExternalKbPage() {
     history.back();
 }
 
+// ===== 知识库分类管理 =====
+let currentKbCategory = '手册';
+let kbCategories = ['手册', '程序文件', '三层次文件', '记录表格', '其他'];
+
+function selectKbCategory(cat, btnEl) {
+    currentKbCategory = cat;
+    // 更新选中样式
+    document.querySelectorAll('.kb-cat-item').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    // 更新右列标题
+    const titleEl = document.getElementById('kbFileTitle');
+    if (titleEl) titleEl.textContent = cat;
+    // 重新加载该分类的文件
+    loadKbPageDocs();
+}
+
+function addKbCategory() {
+    const name = prompt('请输入新分类名称：');
+    if (!name || !name.trim()) return;
+    name = name.trim();
+    if (kbCategories.includes(name)) {
+        showToast('该分类已存在', 2000);
+        return;
+    }
+    kbCategories.push(name);
+    // 在 DOM 中添加新按钮
+    const catList = document.getElementById('kbCatList');
+    if (catList) {
+        const btn = document.createElement('button');
+        btn.className = 'kb-cat-item';
+        btn.innerHTML = '📂 ' + escapeHtml(name) + ' <span class="cat-del" onclick="delKbCategory(\'' + name + '\', event)">×</span>';
+        btn.onclick = function() { selectKbCategory(name, this); };
+        catList.appendChild(btn);
+    }
+    showToast('已添加分类：' + name, 2000);
+}
+
+function delKbCategory(name, event) {
+    event.stopPropagation();
+    if (!confirm('确认删除分类「' + name + '」？该分类下的文件不会被删除。')) return;
+    kbCategories = kbCategories.filter(c => c !== name);
+    // 如果删除的是当前选中的，切换到第一个
+    if (currentKbCategory === name) {
+        currentKbCategory = kbCategories[0] || '手册';
+        const firstBtn = document.querySelector('.kb-cat-item');
+        if (firstBtn) selectKbCategory(currentKbCategory, firstBtn);
+    }
+    // 从 DOM 移除
+    document.querySelectorAll('.kb-cat-item').forEach(btn => {
+        if (btn.textContent.includes(name)) btn.remove();
+    });
+    showToast('已删除分类：' + name, 2000);
+}
+
 function showKbPage() {
     if (!currentAgentId) {
         showToast('请先选择一个智能体');
