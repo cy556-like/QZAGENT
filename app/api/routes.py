@@ -2941,6 +2941,62 @@ async def get_agents(authorization: str = Header(None)):
 
 
 
+# ===== 外部知识库上传 =====
+
+@router.post("/external-kb/upload", summary="上传文档到外部知识库")
+async def external_kb_upload(file: UploadFile = File(...), username: str = Depends(require_auth)):
+    """上传文档到外部知识库（external_kb collection）"""
+    allowed_ext = {".pdf", ".txt", ".md", ".docx", ".xlsx", ".xls", ".doc"}
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_ext:
+        raise HTTPException(status_code=400, detail=f"不支持的格式: {ext}")
+
+    # 保存文件到外部知识库目录
+    ext_doc_dir = os.path.join(settings.DOCUMENTS_DIR, "external_kb")
+    os.makedirs(ext_doc_dir, exist_ok=True)
+    decoded_filename = file.filename
+    file_path = os.path.join(ext_doc_dir, decoded_filename)
+
+    content_bytes = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content_bytes)
+
+    logger.info(f"[外部知识库上传] 用户={username}, 文件={decoded_filename}")
+
+    # 索引到 external_kb collection
+    try:
+        index_result = await asyncio.to_thread(index_document, file_path, decoded_filename, agent_id="__external__")
+        if index_result.get("status") == "error":
+            raise HTTPException(status_code=500, detail=index_result.get("message", "索引失败"))
+        logger.info(f"[外部知识库] 索引成功: {decoded_filename}")
+        return {"success": True, "filename": decoded_filename, "message": "上传并索引成功"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"[外部知识库] 索引异常: {e}")
+        raise HTTPException(status_code=500, detail=f"索引失败: {str(e)}")
+
+
+@router.get("/external-kb/documents", summary="列出外部知识库文档")
+async def external_kb_documents(username: str = Depends(require_auth)):
+    """列出外部知识库的所有文档"""
+    try:
+        docs = await asyncio.to_thread(list_indexed_documents, agent_id="__external__")
+        return {"success": True, "documents": docs}
+    except Exception as e:
+        return {"success": True, "documents": []}
+
+
+@router.delete("/external-kb/documents/{filename}", summary="删除外部知识库文档")
+async def delete_external_kb_document(filename: str, username: str = Depends(require_auth)):
+    """删除外部知识库的文档"""
+    try:
+        result = await asyncio.to_thread(delete_document, filename, agent_id="__external__")
+        return {"success": True, "message": f"已删除 {filename}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ===== 体系调研文档上传与AI提取 =====
 
 @router.post("/survey/upload", summary="上传体系调研文档到临时目录")
