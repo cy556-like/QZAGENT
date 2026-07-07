@@ -3087,8 +3087,16 @@ function hideSurveyForm() {
     const chatContent = document.getElementById('chatContent');
     if (surveyPage) surveyPage.style.display = 'none';
     if (chatContent) chatContent.style.display = 'flex';
-    window._navigatingFromSurvey = true;
-    history.back();
+    // 显示欢迎页
+    const welcomeEl = document.getElementById('welcomeCenter');
+    if (welcomeEl) welcomeEl.style.display = '';
+    // 更新 history state（不调 history.back，避免 popstate 干扰）
+    history.replaceState({page: 'chat'}, '');
+    // 渲染智能体列表和会话列表
+    renderMyAgents();
+    loadChatList();
+    updateGenButtonsVisibility();
+    updateHeaderKbVisibility();
 }
 
 function collectSurveyData() {
@@ -3132,10 +3140,24 @@ function saveSurveyData() {
     if (!data.sv_products) { showToast('请填写体系覆盖的产品', 3000); return; }
     if (!data.sv_filler_name) { showToast('请填写填写人姓名', 3000); return; }
     if (!data.sv_filler_phone) { showToast('请填写填写人手机', 3000); return; }
-    // 保存
+    // 保存到 localStorage
     localStorage.setItem('surveyData', JSON.stringify(data));
-    showToast('✓ 体系调研信息已保存，现在可以一键生成文档', 3000);
-    hideSurveyForm();
+    // 隐藏表单，显示聊天界面
+    const surveyPage = document.getElementById('surveyPage');
+    const chatContent = document.getElementById('chatContent');
+    if (surveyPage) surveyPage.style.display = 'none';
+    if (chatContent) chatContent.style.display = 'flex';
+    // 显示欢迎页
+    const welcomeEl = document.getElementById('welcomeCenter');
+    if (welcomeEl) welcomeEl.style.display = '';
+    // 更新 history
+    history.replaceState({page: 'chat'}, '');
+    // 刷新界面
+    renderMyAgents();
+    loadChatList();
+    updateGenButtonsVisibility();
+    updateHeaderKbVisibility();
+    showToast('✓ 体系调研信息已保存，点击左侧按钮可一键生成文档', 3000);
 }
 
 function saveSurveyDraft() {
