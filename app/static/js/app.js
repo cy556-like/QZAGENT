@@ -3352,10 +3352,18 @@ function saveSurveyData() {
     history.replaceState({page: 'chat'}, '');
     // 刷新界面
     renderMyAgents();
-    loadChatList();
     updateGenButtonsVisibility();
     updateHeaderKbVisibility();
-    showToast('✓ 体系调研信息已保存，点击左侧按钮可一键生成文档', 3000);
+    // 如果没有当前对话，创建一个新对话
+    if (!currentChatId) {
+        createNewChat().then(() => {
+            loadChatList();
+            showToast('✓ 体系调研信息已保存，点击左侧按钮可一键生成文档', 3000);
+        });
+    } else {
+        loadChatList();
+        showToast('✓ 体系调研信息已保存，点击左侧按钮可一键生成文档', 3000);
+    }
 }
 
 function saveSurveyDraft() {
@@ -3476,11 +3484,16 @@ function generateDocument(type) {
     const bubble = createStreamingBubble();
     
     (async () => {
-        if (isLoading) return;
+        if (isLoading) { showToast('请等待当前回复完成', 2000); return; }
         isLoading = true;
+        // 确保有当前对话
         if (!currentChatId) {
             await createNewChat();
-            if (!currentChatId) { isLoading = false; return; }
+            if (!currentChatId) {
+                isLoading = false;
+                showToast('创建对话失败，请重试', 3000);
+                return;
+            }
         }
         const sendBtn = document.getElementById('sendBtn');
         if (sendBtn) sendBtn.disabled = true;
