@@ -1041,15 +1041,35 @@ async function doLogin() {
                 renderMyAgents();
                 updateKbUploadVisibility();
                 updateHeaderKbVisibility();
-                // [#14] 默认选中第一个智能体，避免进入空白的agent模式
+                // [#14] 默认选中第一个智能体
                 if (!currentAgentId && myAgents.length > 0) {
-                    await switchToAgent(myAgents[0].id);
+                    currentAgentId = myAgents[0].id;
+                    currentMode = 'agent';
+                    renderMyAgents();
+                    updateGenButtonsVisibility();
+                    updateHeaderKbVisibility();
                 }
-                // 检查是否已填写体系调研信息
-                const surveyData = localStorage.getItem('surveyData');
-                if (!surveyData) {
-                    // 未填写体系调研 → 显示填写表单（不显示聊天框）
-                    setTimeout(() => showSurveyForm(), 100);
+                // 检查是否有历史对话
+                const modeChats = getModeChats();
+                if (modeChats && modeChats.length > 0) {
+                    // 有历史对话 → 加载最新的那个对话
+                    currentChatId = modeChats[0].chat_id;
+                    modeChatId['agent'] = currentChatId;
+                    renderChatList();
+                    await loadChatHistory(currentChatId);
+                } else {
+                    // 没有历史对话 → 检查是否已填写体系调研
+                    const surveyData = localStorage.getItem('surveyData');
+                    if (!surveyData) {
+                        // 未填写 → 显示填写表单
+                        setTimeout(() => showSurveyForm(), 100);
+                    } else {
+                        // 已填写但没对话 → 显示空白聊天界面
+                        currentChatId = null;
+                        modeChatId['agent'] = null;
+                        clearChatUI();
+                        renderChatList();
+                    }
                 }
             }, 500);
         } else { msgEl.className = 'msg-box error'; msgEl.textContent = data.message || '登录失败'; }
