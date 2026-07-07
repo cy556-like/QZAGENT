@@ -2713,17 +2713,41 @@ def list_indexed_documents(agent_id: str = None) -> list[str]:
             sources.add(entry["source_file"])
 
     # 3. 磁盘文件扫描（兜底：确保文件存在但索引丢失时仍可见）
-    if agent_id:
+    if agent_id == "__external__":
+        scan_dir = os.path.join(settings.DOCUMENTS_DIR, "external_kb")
+        if os.path.exists(scan_dir):
+            for fname in os.listdir(scan_dir):
+                ext = os.path.splitext(fname)[1].lower()
+                if ext in {'.pdf', '.txt', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}:
+                    file_path = os.path.join(scan_dir, fname)
+                    if os.path.isfile(file_path):
+                        sources.add(fname)
+    elif agent_id:
         scan_dir = os.path.join(settings.DOCUMENTS_DIR, f"agent_{agent_id}")
+        if os.path.exists(scan_dir):
+            for item in os.listdir(scan_dir):
+                item_path = os.path.join(scan_dir, item)
+                if os.path.isfile(item_path):
+                    ext = os.path.splitext(item)[1].lower()
+                    if ext in {'.pdf', '.txt', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}:
+                        sources.add(item)
+                elif os.path.isdir(item_path):
+                    # 分类子目录
+                    for fname in os.listdir(item_path):
+                        ext = os.path.splitext(fname)[1].lower()
+                        if ext in {'.pdf', '.txt', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}:
+                            file_path = os.path.join(item_path, fname)
+                            if os.path.isfile(file_path):
+                                sources.add(fname)
     else:
         scan_dir = settings.DOCUMENTS_DIR
-    if os.path.exists(scan_dir):
-        for fname in os.listdir(scan_dir):
-            ext = os.path.splitext(fname)[1].lower()
-            if ext in {'.pdf', '.txt', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}:
-                file_path = os.path.join(scan_dir, fname)
-                if os.path.isfile(file_path):
-                    sources.add(fname)
+        if os.path.exists(scan_dir):
+            for fname in os.listdir(scan_dir):
+                ext = os.path.splitext(fname)[1].lower()
+                if ext in {'.pdf', '.txt', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}:
+                    file_path = os.path.join(scan_dir, fname)
+                    if os.path.isfile(file_path):
+                        sources.add(fname)
 
     return sorted(list(sources))
 
