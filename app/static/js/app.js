@@ -1071,11 +1071,8 @@ async function doLogin() {
                         // 未填写 → 显示填写表单
                         setTimeout(() => showSurveyForm(), 100);
                     } else {
-                        // 已填写但没对话 → 显示空白聊天界面
-                        currentChatId = null;
-                        modeChatId['agent'] = null;
-                        clearChatUI();
-                        renderChatList();
+                        // 没有历史对话 → 无论是否填过调研，都显示填表页
+                        setTimeout(() => showSurveyForm(), 100);
                     }
                 }
             }, 500);
@@ -3470,6 +3467,54 @@ function generateDocument(type) {
         'rectification': '不合格项整改'
     };
     const typeName = typeMap[type] || type;
+    
+    // 付费功能：三层次文件、记录表格、不合格项整改
+    if (type === 'third-level' || type === 'record' || type === 'rectification') {
+        const surveyData = getSurveyData();
+        if (!surveyData) {
+            showToast('请先点击"填写体系调研"填写企业信息', 3000);
+            showSurveyForm();
+            return;
+        }
+        const surveyPage = document.getElementById('surveyPage');
+        if (surveyPage && surveyPage.style.display !== 'none') {
+            hideSurveyForm();
+        }
+        document.getElementById('chatContent').classList.remove('centered');
+        const bubble = createStreamingBubble();
+        const payMsg = '本版本为试用，如需使用：\n请汇款至：\n账户名称：北京全质科技股份有限公司\n账户号码：11050163810000000267\n开户银行：中国建设银行股份有限公司北京北洼路支行\n（提供6%的增值税专用发票）\n或联系售前服务电话（微信同号）：18601256219';
+        (async () => {
+            if (isLoading) return;
+            isLoading = true;
+            if (!currentChatId) {
+                await createNewChat();
+                if (!currentChatId) { isLoading = false; return; }
+            }
+            try {
+                await streamChat('/api/v1/chat/stream', {
+                    method: 'POST',
+                    headers: apiHeaders(),
+                    body: JSON.stringify({
+                        message: '请回复以下内容，原样输出：' + payMsg,
+                        session_id: currentChatId,
+                        web_search: false,
+                        mode: currentMode,
+                        deep_think: false,
+                        skill: '',
+                        agent_id: currentAgentId || '',
+                        agent_task: (currentAgentId && myAgents.find(a => a.id === currentAgentId)) ? myAgents.find(a => a.id === currentAgentId).task : ''
+                    })
+                }, bubble);
+                await loadChatList();
+                scrollToBottom();
+            } catch (e) {
+                console.error('[付费提示] 失败:', e);
+            } finally {
+                resetStreamingUI();
+            }
+        })();
+        return;
+    }
     const surveyData = getSurveyData();
     if (!surveyData) {
         showToast('请先点击"填写体系调研"填写企业信息', 3000);
