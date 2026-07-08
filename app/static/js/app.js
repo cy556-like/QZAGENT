@@ -1042,6 +1042,12 @@ async function doLogin() {
                 if (userRole === 'admin') {
                     document.getElementById('headerUserName').textContent = username + ' (管理员)';
                 }
+                // 清空旧的对话缓存（避免 JLAGENT 旧数据残留）
+                allChats = [];
+                currentChatId = null;
+                modeChatId = { agent: null, chat: null };
+                // 清空旧的 agentActiveChatId
+                Object.keys(agentActiveChatId).forEach(k => delete agentActiveChatId[k]);
                 loadChatList();
                 loadModels();
                 await syncAgentsFromServer(true);  // [#12] 登录时强制同步一次，内部已调用 rebuildChatIdsFromServer（会GET /chats）
